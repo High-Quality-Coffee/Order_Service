@@ -9,6 +9,10 @@ import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,7 +59,7 @@ public class OrderService {
 
 
     @Transactional
-    public Order deleteOrder(UUID orderId) {
+    public OrderResponse deleteOrder(UUID orderId) {
 
         Order order = orderRepository.findById(orderId).orElseThrow(
                 ()-> new IllegalArgumentException("Order Not Found")
@@ -68,6 +72,36 @@ public class OrderService {
 
         orderRepository.delete(order);
 
-        return order;
+        return OrderResponse.from(order);
     }
+
+    public OrderResponse getOrderById(UUID orderId) {
+
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new IllegalArgumentException("Order Not Found")
+        );
+
+        // 유저 인증 추가 구현 필요
+        if(order.getUserId() != 1L){
+            throw new IllegalArgumentException("Not Own Order");
+        }
+
+        return OrderResponse.from(order);
+    }
+
+    public List<OrderResponse> searchOrders(String userName, int page, int limit,
+                                          Boolean isAsc, String orderBy) {
+        Sort.Direction direction;
+        if(isAsc){
+            direction = Sort.Direction.ASC;
+        }else {
+            direction = Sort.Direction.DESC;
+        }
+        Pageable pageable = PageRequest.of(page-1, limit, Sort.by(direction, orderBy));
+
+        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName,pageable).map(OrderResponse::from);
+
+        return orderPage.toList();
+    }
+
 }
