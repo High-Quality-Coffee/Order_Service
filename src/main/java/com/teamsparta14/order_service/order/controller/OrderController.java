@@ -42,14 +42,14 @@ public class OrderController {
         return ApiResponse.success(orderService.getOrderById(orderId));
     }
 
-    @GetMapping(path = "/{userName}")
+    @GetMapping
     public ApiResponse<List<OrderResponse>> getOrderByPage(
-            @PathVariable(name = "userName") String userName,
+            @RequestParam(name = "userId") Long userId,
             @RequestParam(name = "page") int page,
             @RequestParam(name = "limit") int limit,
             @RequestParam(name = "isAsc") Boolean isAsc,
             @RequestParam(name = "orderBy") String orderBy){
 
-        return ApiResponse.success(orderService.searchOrders(userName,page,limit,isAsc,orderBy));
+        return ApiResponse.success(orderService.searchOrders(userId,page,limit,isAsc,orderBy));
     }
 }

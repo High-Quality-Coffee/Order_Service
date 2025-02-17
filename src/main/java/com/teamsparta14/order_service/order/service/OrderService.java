@@ -89,7 +89,7 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
-    public List<OrderResponse> searchOrders(String userName, int page, int limit,
+    public List<OrderResponse> searchOrders(Long userId, int page, int limit,
                                           Boolean isAsc, String orderBy) {
         Sort.Direction direction;
         if(isAsc){
@@ -99,7 +99,7 @@ public class OrderService {
         }
         Pageable pageable = PageRequest.of(page-1, limit, Sort.by(direction, orderBy));
 
-        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName,pageable).map(OrderResponse::from);
+        Page<OrderResponse> orderPage = orderRepository.searchByUserId(userId,pageable).map(OrderResponse::from);
 
         return orderPage.toList();
     }
