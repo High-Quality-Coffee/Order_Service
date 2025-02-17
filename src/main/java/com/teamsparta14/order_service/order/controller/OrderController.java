@@ -8,6 +8,8 @@ import com.teamsparta14.order_service.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/orders")
@@ -23,4 +25,14 @@ public class OrderController {
 
         return ApiResponse.success(orderService.createOrder(createDto, userId));
     }
+
+    @DeleteMapping(path = "/{order-id}")
+    public ApiResponse<Order> deleteOrder(
+            @PathVariable(name = "order-id") UUID orderId){
+
+        System.out.println(orderId);
+        return ApiResponse.success(orderService.deleteOrder(orderId));
+    }
+
+
 }

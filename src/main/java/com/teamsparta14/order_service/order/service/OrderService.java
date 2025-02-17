@@ -7,10 +7,12 @@ import com.teamsparta14.order_service.order.dto.OrderResponse;
 import com.teamsparta14.order_service.order.entity.Order;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -51,4 +53,21 @@ public class OrderService {
          return OrderResponse.from(orderRepository.save(order));
     }
 
+
+    @Transactional
+    public Order deleteOrder(UUID orderId) {
+
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                ()-> new IllegalArgumentException("Order Not Found")
+        );
+
+        // 유저 인증 추가 구현 필요
+        if(order.getUserId() != 1L){
+            throw new IllegalArgumentException("Not Own Order");
+        }
+
+        orderRepository.delete(order);
+
+        return order;
+    }
 }
