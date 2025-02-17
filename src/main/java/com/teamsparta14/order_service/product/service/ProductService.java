@@ -6,11 +6,10 @@ import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,5 +71,6 @@ public class ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("수정할 상품을 찾을 수 없습니다."));
 
         product.delete();
+        product.setDeleted(LocalDateTime.now(), "User");
     }
 }
