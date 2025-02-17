@@ -6,8 +6,10 @@ import com.teamsparta14.order_service.order.dto.OrderResponse;
 import com.teamsparta14.order_service.order.entity.Order;
 import com.teamsparta14.order_service.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,12 +29,27 @@ public class OrderController {
     }
 
     @DeleteMapping(path = "/{order-id}")
-    public ApiResponse<Order> deleteOrder(
+    public ApiResponse<OrderResponse> deleteOrder(
             @PathVariable(name = "order-id") UUID orderId){
 
-        System.out.println(orderId);
         return ApiResponse.success(orderService.deleteOrder(orderId));
     }
 
+    @GetMapping(path = "/{order-id}")
+    public ApiResponse<OrderResponse> getOrderById(
+            @PathVariable(name = "order-id") UUID orderId){
 
+        return ApiResponse.success(orderService.getOrderById(orderId));
+    }
+
+    @GetMapping(path = "/{userName}")
+    public ApiResponse<List<OrderResponse>> getOrderByPage(
+            @PathVariable(name = "userName") String userName,
+            @RequestParam(name = "page") int page,
+            @RequestParam(name = "limit") int limit,
+            @RequestParam(name = "isAsc") Boolean isAsc,
+            @RequestParam(name = "orderBy") String orderBy){
+
+        return ApiResponse.success(orderService.searchOrders(userName,page,limit,isAsc,orderBy));
+    }
 }
