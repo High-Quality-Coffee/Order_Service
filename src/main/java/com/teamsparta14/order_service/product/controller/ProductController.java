@@ -2,8 +2,11 @@ package com.teamsparta14.order_service.product.controller;
 
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,9 +24,14 @@ public class ProductController {
 
     //상품 전체 조회
     @GetMapping("/products")
-    public ResponseEntity<List<ProductResponseDto>> getProducts(@RequestParam("store_id") UUID storeId){
-
-        List<ProductResponseDto> products = productService.getProducts(storeId);
+    public ResponseEntity<List<ProductResponseDto>> getProducts(
+            @RequestParam("store_id") UUID storeId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "LATEST") SortBy sortBy
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        List<ProductResponseDto> products = productService.getProducts(storeId, pageable, sortBy);
 
         return ResponseEntity.status(HttpStatus.OK).body(products);
     }
