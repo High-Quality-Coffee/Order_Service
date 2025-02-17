@@ -13,12 +13,14 @@ import java.util.UUID;
 public class ProductResponseDto {
 
     private UUID storeId;
+    private UUID productId;
     private String productName;
     private int productPrice;
 
     public static ProductResponseDto of(Product product) {
         return ProductResponseDto.builder()
                 .storeId(product.getStoreId())
+                .productId(product.getId())
                 .productName(product.getProductName())
                 .productPrice(product.getProductPrice())
                 .build();
