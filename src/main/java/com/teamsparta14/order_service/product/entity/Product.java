@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Builder
 @Entity
 @Getter
@@ -17,25 +19,22 @@ import lombok.NoArgsConstructor;
 public class Product extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    /*@GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;*/
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Builder.Default
-    private Long storeId = 1L;
+    private UUID storeId;
     private String productName;
     private int productPrice;
     private boolean isDeleted;
 
-    public Product(ProductRequestDto requestDto, Long storeId) {
+    public Product(ProductRequestDto requestDto, UUID storeId) {
         this.storeId = storeId;
         this.productName = requestDto.getProduct_name();
         this.productPrice = requestDto.getProduct_price();
         this.isDeleted = false;
     }
 
-    public void upadte(Long id, ProductRequestDto requestDto) {
+    public void upadte(UUID id, ProductRequestDto requestDto) {
         this.id = id;
         this.productName = requestDto.getProduct_name();
         this.productPrice = requestDto.getProduct_price();
