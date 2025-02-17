@@ -3,6 +3,8 @@ package com.teamsparta14.order_service.product.dto;
 import com.teamsparta14.order_service.product.entity.Product;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,7 +12,7 @@ import lombok.*;
 @Builder
 public class ProductResponseDto {
 
-    private Long storeId;
+    private UUID storeId;
     private String productName;
     private int productPrice;
 
