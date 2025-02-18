@@ -2,6 +2,7 @@ package com.teamsparta14.order_service.user.controller;
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.global.response.ResponseCode;
+import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.dto.UserRequestDTO;
 import com.teamsparta14.order_service.user.dto.UserResponseDTO;
 import com.teamsparta14.order_service.user.entity.UserEntity;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,6 +52,13 @@ public class UserController {
     @PostMapping("/api/auth/token/reissue")
     public ResponseEntity<ApiResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response){
         return tokenReissueService.token_reissue(request,response);
+    }
+
+    //회원탈퇴
+    @DeleteMapping("/api/auth/delete")
+    public ResponseEntity<ApiResponse<String>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        userService.deleteUser(customUserDetails);
+        return ResponseEntity.ok().body(ApiResponse.success("회원탈퇴가 진행되었습니다"));
     }
 
 
