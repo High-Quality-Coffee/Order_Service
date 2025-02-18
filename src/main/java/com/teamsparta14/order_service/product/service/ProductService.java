@@ -1,7 +1,10 @@
 package com.teamsparta14.order_service.product.service;
 
+import com.teamsparta14.order_service.order.dto.OrderProductRequest;
+import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.product.repository.ProductRepository;
@@ -85,5 +88,17 @@ public class ProductService {
         product.updateOrderCount(requestDto.getProductQuantity());
 
         return ProductResponseDto.of(product);
+    }
+
+    public  List<ProductResponseDto> searchProduct(ProductSearchDto requestDto) {
+
+        List<Product> productList = productRepository.searchProductByIdList(requestDto);
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(ProductResponseDto.of(product));
+        }
+
+        return responseDtoList;
     }
 }

@@ -8,6 +8,10 @@ import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
 import com.teamsparta14.order_service.order.entity.Order;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
+import com.teamsparta14.order_service.order.repository.ProductClient;
+import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
+import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.entity.Product;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,19 +30,27 @@ import java.util.UUID;
 public class OrderService {
 //
 //    private final StoresClient storesClient;
-//    private final ProductClient productClient;
+    private final ProductClient productClient;
     private final OrderRepository orderRepository;
 
 
-    public OrderResponse createOrder(OrderCreateDto createDto , String userName) {
+    public OrderResponse createOrder(OrderCreateDto createDto , String userName,String token) {
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
+        ProductListResponseDto responseDtoList = productClient.searchProductList(orderProductRequests,token);
+
         Order order = createDto.from(userName);
          for (OrderProductRequest orderProductRequest : orderProductRequests) {
 
+
+
+
+//             if(product.getQuantity() < orderProductRequest.getQuantity()){
+//                 throw new IllegalArgumentException("Not Enough Product");
+//             }
              //수량 체크 구현 예정
              //이때 storeid와 productId를 사용하여 productClient 통해 http 통신으로 구현
 
