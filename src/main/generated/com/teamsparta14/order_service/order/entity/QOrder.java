@@ -46,6 +46,8 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final ComparablePath<java.util.UUID> order = createComparable("order", java.util.UUID.class);
 
+    public final StringPath orderComment = createString("orderComment");
+
     public final ListPath<OrderProduct, QOrderProduct> orderProducts = this.<OrderProduct, QOrderProduct>createList("orderProducts", OrderProduct.class, QOrderProduct.class, PathInits.DIRECT2);
 
     public final EnumPath<com.teamsparta14.order_service.order.dto.OrderType> orderType = createEnum("orderType", com.teamsparta14.order_service.order.dto.OrderType.class);

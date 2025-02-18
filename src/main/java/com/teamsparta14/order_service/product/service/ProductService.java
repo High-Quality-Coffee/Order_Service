@@ -66,11 +66,13 @@ public class ProductService {
 
     //상품 삭제
     @Transactional
-    public void deleteProduct(UUID productId) {
+    public ProductResponseDto deleteProduct(UUID productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("수정할 상품을 찾을 수 없습니다."));
 
         product.delete();
         product.setDeleted(LocalDateTime.now(), "User");
+
+        return ProductResponseDto.of(product);
     }
 }

@@ -26,6 +26,7 @@ public class Product extends BaseEntity {
     private String productName;
     private int productPrice;
     private boolean isDeleted;
+    //private boolean isHidden; 숨김처리 필요
 
     public Product(ProductRequestDto requestDto, UUID storeId) {
         this.storeId = storeId;
