@@ -23,7 +23,7 @@ public abstract class BaseEntity{
     private LocalDateTime createdAt;
 
     @CreatedBy
-    @Column(updatable = false, length = 100)
+    @Column(updatable = false,length = 100)
     private String createdBy;
 
     @LastModifiedDate
