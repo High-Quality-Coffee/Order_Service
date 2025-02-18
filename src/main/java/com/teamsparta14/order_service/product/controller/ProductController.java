@@ -60,7 +60,7 @@ public class ProductController {
     @PutMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
 
-        ProductResponseDto responseDto = productService.updateProduct(requestDto.getStoreId(), productId, requestDto);
+        ProductResponseDto responseDto = productService.updateProduct(productId, requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }

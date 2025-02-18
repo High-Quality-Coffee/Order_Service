@@ -54,12 +54,12 @@ public class ProductService {
 
     //상품 수정
     @Transactional
-    public ProductResponseDto updateProduct(UUID storeId, UUID productId, ProductRequestDto requestDto) {
+    public ProductResponseDto updateProduct(UUID productId, ProductRequestDto requestDto) {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new EntityNotFoundException("수정할 상품을 찾을 수 없습니다."));
 
-        product.upadte(product.getId(), requestDto);
+        product.update(requestDto);
 
         return ProductResponseDto.of(product);
     }
