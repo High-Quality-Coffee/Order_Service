@@ -9,13 +9,8 @@ import com.teamsparta14.order_service.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -105,5 +100,20 @@ public class ProductService {
         product.updateStatus(status);
 
         return ProductResponseDto.of(product);
+    }
+    
+    //상품 검색
+    public List<ProductResponseDto> searchByTitle(UUID storeId, String keyword, Pageable pageable, SortBy sortBy, ProductStatus status) {
+
+        if(keyword == null) keyword = "";
+
+        List<Product> productList = productRepository.findByTitleContain(storeId, keyword,pageable, sortBy, status);
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(ProductResponseDto.of(product));
+        }
+
+        return responseDtoList;
     }
 }

@@ -14,6 +14,9 @@ public interface CustomProductRepository {
     //상품 전체 조회
     List<Product> findAllByStoreId(UUID storeId, Pageable pageable, SortBy sortBy, ProductStatus status);
 
+    //상품 검색
+    List<Product> findByTitleContain(UUID storeId, String keyword, Pageable pageable, SortBy sortBy, ProductStatus status);
+
     //상품 상세 조회
     Optional<Product> findByProductId(UUID productId);
 }
