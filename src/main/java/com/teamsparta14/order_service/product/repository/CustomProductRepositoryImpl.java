@@ -1,8 +1,10 @@
 package com.teamsparta14.order_service.product.repository;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.teamsparta14.order_service.product.entity.Product;
+import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +25,7 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
     private static final List<Integer> ALLOWED_PAGE_SIZES = Arrays.asList(10, 30, 50);
 
     @Override
-    public List<Product> findAllByStoreId(UUID storeId, Pageable pageable, SortBy sortBy) {
+    public List<Product> findAllByStoreId(UUID storeId, Pageable pageable, SortBy sortBy, ProductStatus status) {
         //페이지 사이즈 검증 및 조정
         int pageSize = ALLOWED_PAGE_SIZES.contains(pageable.getPageSize()) ? pageable.getPageSize() : DEFAULT_SIZE;
 
@@ -31,7 +33,8 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                 .selectFrom(product)
                 .where(
                         product.storeId.eq(storeId),
-                        product.isDeleted.eq(false)
+                        product.isDeleted.eq(false),
+                        statusEq(status)
                 );
 
         //정렬 옵션
@@ -49,6 +52,11 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                 .offset(pageable.getOffset())
                 .limit(pageSize)
                 .fetch();
+    }
+
+    //상품 상태 검증
+    private BooleanExpression statusEq(ProductStatus status) {
+        return status != null ? product.status.eq(status) : null;
     }
 
     @Override
