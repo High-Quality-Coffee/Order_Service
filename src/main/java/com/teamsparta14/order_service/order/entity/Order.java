@@ -25,8 +25,8 @@ public class Order extends BaseEntity {
     @Column(name = "order_id")
     private UUID order;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "user_name", nullable = false)
+    private String userName;
 
     @Column(name = "store_id", nullable = false)
     private UUID storeId;
@@ -54,7 +54,7 @@ public class Order extends BaseEntity {
         this.payment = Payment.builder()
                 .paymentStatus(PaymentStatus.PENDING)
                 .amount(getAmount(orderProducts))
-                .userId(userId)
+                .userName(userName)
                 .build();
     }
 
@@ -64,5 +64,12 @@ public class Order extends BaseEntity {
             amount += orderProduct.getPrice() * orderProduct.getQuantity();
         }
         return amount;
+    }
+
+    public void updateOrderProductList(List<OrderProduct> updateList) {
+        this.orderProducts.clear();
+        for (OrderProduct orderProduct : updateList) {
+            this.orderProducts.add(orderProduct);
+        }
     }
 }

@@ -24,8 +24,8 @@ public class Payment extends BaseEntity {
     @OneToOne(mappedBy = "payment")
     private Order order;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(name = "user_name")
+    private String userName;
 
     @Column(name = "amount")
     private Long amount;

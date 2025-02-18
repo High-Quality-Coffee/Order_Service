@@ -4,6 +4,7 @@ package com.teamsparta14.order_service.order.service;
 import com.teamsparta14.order_service.order.dto.OrderCreateDto;
 import com.teamsparta14.order_service.order.dto.OrderProductRequest;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
+import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
 import com.teamsparta14.order_service.order.entity.Order;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,13 +30,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
 
-    public OrderResponse createOrder(OrderCreateDto createDto , Long userId) {
+    public OrderResponse createOrder(OrderCreateDto createDto , String userName) {
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
-        Order order = createDto.from(userId);
+        Order order = createDto.from(userName);
          for (OrderProductRequest orderProductRequest : orderProductRequests) {
 
              //수량 체크 구현 예정
@@ -59,14 +61,15 @@ public class OrderService {
 
 
     @Transactional
-    public OrderResponse deleteOrder(UUID orderId) {
+    public OrderResponse deleteOrder(UUID orderId,String userName) {
+
 
         Order order = orderRepository.findById(orderId).orElseThrow(
                 ()-> new IllegalArgumentException("Order Not Found")
         );
 
         // 유저 인증 추가 구현 필요
-        if(order.getUserId() != 1L){
+        if(!order.getUserName().equals(userName)){
             throw new IllegalArgumentException("Not Own Order");
         }
 
@@ -75,21 +78,24 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
-    public OrderResponse getOrderById(UUID orderId) {
+    public OrderResponse getOrderById(UUID orderId,String userName) {
+        ;
 
         Order order = orderRepository.findById(orderId).orElseThrow(
-                () -> new IllegalArgumentException("Order Not Found")
+                ()-> new IllegalArgumentException("Order Not Found")
         );
 
         // 유저 인증 추가 구현 필요
-        if(order.getUserId() != 1L){
+        if(!order.getUserName().equals(userName)){
             throw new IllegalArgumentException("Not Own Order");
         }
+
+        // 유저 인증 추가 구현 필요
 
         return OrderResponse.from(order);
     }
 
-    public List<OrderResponse> searchOrders(Long userId, int page, int limit,
+    public List<OrderResponse> searchOrders(String userName, int page, int limit,
                                           Boolean isAsc, String orderBy) {
         Sort.Direction direction;
         if(isAsc){
@@ -99,9 +105,35 @@ public class OrderService {
         }
         Pageable pageable = PageRequest.of(page-1, limit, Sort.by(direction, orderBy));
 
-        Page<OrderResponse> orderPage = orderRepository.searchByUserId(userId,pageable).map(OrderResponse::from);
+        Page<OrderResponse> orderPage = orderRepository.searchByUserId(userName,pageable).map(OrderResponse::from);
 
         return orderPage.toList();
     }
 
+    @Transactional
+    public OrderResponse updateOrder(OrderUpdateRequest orderUpdateRequest, String userName) {
+
+        Order order = orderRepository.findById(orderUpdateRequest.getOrderId()).orElseThrow(
+                ()-> new IllegalArgumentException("Order Not Found")
+        );
+
+        if(!order.getUserName().equals(userName)){
+            throw new IllegalArgumentException("Not Own Order");
+        }
+
+        List<OrderProduct> updateList = new ArrayList<>();
+
+        for (OrderProductRequest orderProductRequest : orderUpdateRequest.getOrderProductRequests()) {
+            updateList.add(OrderProduct.builder()
+                    .order(order)
+                    .productId(orderProductRequest.getProductId())
+                    .quantity(orderProductRequest.getQuantity())
+                    .price(orderProductRequest.getPrice())
+                    .build());
+        }
+
+        order.updateOrderProductList(updateList);
+
+        return OrderResponse.from(order);
+    }
 }

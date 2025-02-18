@@ -25,14 +25,14 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Order> searchByUserId(Long userId, Pageable pageable) {
+    public Page<Order> searchByUserId(String userName, Pageable pageable) {
 
 
         List<Order> query = jpaQueryFactory
                 .selectFrom(order1)
                 .distinct()
                 .where(
-                        order1.userId.eq(userId),
+                        order1.userName.eq(userName),
                         order1.deletedAt.isNull()
                 )
                 .offset(pageable.getOffset())
