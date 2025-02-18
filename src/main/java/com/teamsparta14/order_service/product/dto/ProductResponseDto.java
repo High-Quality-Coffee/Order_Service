@@ -15,7 +15,8 @@ public class ProductResponseDto {
     private UUID storeId;
     private UUID productId;
     private String productName;
-    private int productPrice;
+    private Long productPrice;
+    private Long productQuantity;
 
     public static ProductResponseDto of(Product product) {
         return ProductResponseDto.builder()
@@ -23,6 +24,7 @@ public class ProductResponseDto {
                 .productId(product.getId())
                 .productName(product.getProductName())
                 .productPrice(product.getProductPrice())
+                .productQuantity(product.getProductQuantity())
                 .build();
     }
 }

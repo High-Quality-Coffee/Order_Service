@@ -3,10 +3,13 @@ package com.teamsparta14.order_service.product.entity;
 import com.teamsparta14.order_service.domain.BaseEntity;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.UUID;
 
@@ -22,26 +25,49 @@ public class Product extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @NotNull
     private UUID storeId;
+
+    @NotNull
     private String productName;
-    private int productPrice;
+
+    @NotNull
+    @Min(0)
+    @ColumnDefault("0")
+    private Long productPrice;
+
+    @NotNull
+    @Min(0)
+    @ColumnDefault("0")
+    private Long productQuantity;
+
+    @NotNull
+    @ColumnDefault("false")
     private boolean isDeleted;
     //private boolean isHidden; 숨김처리 필요
 
     public Product(ProductRequestDto requestDto, UUID storeId) {
         this.storeId = storeId;
-        this.productName = requestDto.getProduct_name();
-        this.productPrice = requestDto.getProduct_price();
+        this.productName = requestDto.getProductName();
+        this.productPrice = requestDto.getProductPrice();
+        this.productQuantity = requestDto.getProductQuantity();
         this.isDeleted = false;
     }
 
-    public void upadte(UUID id, ProductRequestDto requestDto) {
-        this.id = id;
-        this.productName = requestDto.getProduct_name();
-        this.productPrice = requestDto.getProduct_price();
+    public void update(ProductRequestDto requestDto) {
+        this.productName = requestDto.getProductName();
+        this.productPrice = requestDto.getProductPrice();
+        this.productQuantity = requestDto.getProductQuantity();
     }
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void updateOrderCount(Long productQuantity) {
+        if (productQuantity < 0) {
+            throw new IllegalArgumentException("가격은 0원 이상이어야 합니다.");
+        }
+        this.productQuantity = productQuantity;
     }
 }
