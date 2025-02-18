@@ -7,7 +7,6 @@ build/
 *.properties
 *.yml
 src/main/resources/properties/env.properties
-src/main/generated
 
 ### STS ###
 .apt_generated

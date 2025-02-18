@@ -1,4 +1,4 @@
-package com.teamsparta14.order_service.config;
+package com.teamsparta14.order_service.global;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
