@@ -34,8 +34,11 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    // AddressEntity와의 일대다 관계 설정
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    public void delete_user(boolean b){
+        this.isDeleted = b;
+    }
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AddressEntity> addresses = new ArrayList<>();
 
 }

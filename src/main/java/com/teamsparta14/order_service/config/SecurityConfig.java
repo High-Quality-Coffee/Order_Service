@@ -1,5 +1,6 @@
 package com.teamsparta14.order_service.config;
 
+import com.teamsparta14.order_service.global.enums.Role;
 import com.teamsparta14.order_service.user.jwt.CustomLogoutFilter;
 import com.teamsparta14.order_service.user.jwt.JWTFilter;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
@@ -74,6 +75,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화 (POST 요청 허용)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/join/**", "/api/auth/login").permitAll()  // 회원가입은 인증 없이 가능
+                        .requestMatchers("/api/address/**").hasRole("USER")
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )
                 .formLogin(login -> login.disable())  // 기본 로그인 폼 비활성화
