@@ -11,6 +11,6 @@ public class ProductRequestDto {
 
     private UUID storeId;
     private String productName;
-    private int productPrice;
-    private int productQuantity;
+    private Long productPrice;
+    private Long productQuantity;
 }
