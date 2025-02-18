@@ -20,11 +20,13 @@ public class OrderCreateDto {
     private UUID destId;
     private List<OrderProductRequest> orderProductRequests;
     private OrderType orderType;
+    private String orderComment;
 
     public Order from(String userName){
         return Order.builder()
                 .userName(userName)
                 .storeId(storeId)
+                .orderComment(orderComment)
                 .orderProducts(new ArrayList<>())
                 .destId(destId)
                 .orderType(OrderType.ONLINE)
