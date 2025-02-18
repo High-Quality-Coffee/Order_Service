@@ -25,7 +25,7 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
 
-    // 가게 ID를 기반으로 카테고리 이름 리스트 가져오기
+    // [조회] 가게 ID 기반 카테고리 이름 리스트
     private List<String> getCategoryNames(UUID storeId) {
         List<StoreCategory> storeCategories = storeCategoryRepository.findByStoreId(storeId);
         return storeCategories.stream()
@@ -33,7 +33,7 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // 가게 조회 (삭제되지 않은 가게만)
+    // [조회] 삭제되지 않은 가게만
     public List<StoreResponseDto> getAllStores() {
         return storeRepository.findByIsDeletedFalse()
                 .stream()
@@ -41,7 +41,7 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // 가게 등록(owner만)
+    // [등록] 가게 (owner만)
     @Transactional
     public StoreResponseDto createStore(StoreRequestDto dto, String createdBy) {
         Store store = Store.builder()
@@ -56,7 +56,7 @@ public class StoreService {
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
 
-    // 가게 정보 수정
+    // [수정] 가게 정보
     @Transactional
     public StoreResponseDto updateStore(UUID storeId, StoreUpdateRequestDto requestDto, String modifiedBy) {
         Store store = storeRepository.findById(storeId)
@@ -83,7 +83,7 @@ public class StoreService {
         return new StoreResponseDto(store, getCategoryNames(storeId));
     }
 
-    //가게 삭제
+    //[삭제] 가게
     @Transactional
     public void deleteStore(UUID storeId, String deletedBy) {
         Store store = storeRepository.findById(storeId)
