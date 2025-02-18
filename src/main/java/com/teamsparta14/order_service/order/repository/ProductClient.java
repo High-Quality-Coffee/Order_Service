@@ -2,34 +2,70 @@ package com.teamsparta14.order_service.order.repository;
 
 
 
-import com.teamsparta14.order_service.order.entity.Order;
-import com.teamsparta14.order_service.order.entity.ProductTM;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamsparta14.order_service.global.response.ApiResponse;
+import com.teamsparta14.order_service.order.dto.OrderProductRequest;
+import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 
 @Service
+@RequiredArgsConstructor
 public class ProductClient {
 
 
     private final String SERVER_URL = "http://localhost:8080";
 
-    public ProductTM getById(String id){
+
+    public ProductListResponseDto searchProductList(List<OrderProductRequest> orderProductRequests, String token) {
+
         URI uri = UriComponentsBuilder
-                .fromUriString(SERVER_URL)
-                .path("/api/products/" + id)
+                .fromUriString("http://localhost:8080")
+                .path("/api/products/search")
                 .encode()
                 .build()
                 .toUri();
 
+        List<UUID> requestIdList = orderProductRequests.stream().map(OrderProductRequest::getProductId).toList();
         RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36");
 
-        ResponseEntity<ProductTM> responseEntity = restTemplate.getForEntity(uri, ProductTM.class);
+        headers.add("access", token);
 
-        return responseEntity.getBody();
+        HttpEntity<List<UUID>> request = new HttpEntity<>(requestIdList, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            ApiResponse<ProductListResponseDto> productResponse = objectMapper.readValue(response.getBody(), new TypeReference<ApiResponse<ProductListResponseDto>>() {});
+
+            return productResponse.getData();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        } catch (HttpClientErrorException ex) { // Catch 4xx and 5xx errors
+            String errorMessage = "Client Error: " + ex.getRawStatusCode() + " - " + ex.getResponseBodyAsString();
+            throw new RuntimeException(errorMessage, ex); // Re-throw with original exception
+        } catch (RestClientException ex) { // Catch other RestClientExceptions
+            String errorMessage = "Error calling product service: " + ex.getMessage();
+            throw new RuntimeException(errorMessage, ex); // Re-throw
+        }
+
+
     }
 }
