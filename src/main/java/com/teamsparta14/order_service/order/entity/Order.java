@@ -34,6 +34,9 @@ public class Order extends BaseEntity {
     @Column(name = "dest_id", nullable = false)
     private UUID destId;
 
+    @Column(name = "order_comment", nullable = true, length = 1000)
+    private String orderComment;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "payment_id")
     private Payment payment;
