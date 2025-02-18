@@ -4,6 +4,7 @@ import com.teamsparta14.order_service.global.enums.Role;
 import com.teamsparta14.order_service.global.exception.BaseException;
 import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.global.response.ResponseCode;
+import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.dto.UserRequestDTO;
 import com.teamsparta14.order_service.user.dto.UserResponseDTO;
 import com.teamsparta14.order_service.user.entity.UserEntity;
@@ -17,8 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +86,16 @@ public class UserService {
         ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(BaseException::new);
         return modelMapper.map(userEntity,UserResponseDTO.class);
+    }
+
+    //멤버 회원 탈퇴 진행 (soft-delete)
+    @Transactional
+    public void deleteUser(CustomUserDetails customUserDetails){
+        String username = customUserDetails.getUsername();
+        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        userEntity.setDeleted(true);
+        userEntity.setDeleted(LocalDateTime.now(), username);
     }
 
 }
