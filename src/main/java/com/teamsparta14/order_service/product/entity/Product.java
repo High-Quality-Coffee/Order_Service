@@ -46,6 +46,7 @@ public class Product extends BaseEntity {
     private boolean isDeleted;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private ProductStatus status = ProductStatus.ON_SALE;
 
     public Product(ProductRequestDto requestDto, UUID storeId) {
