@@ -17,6 +17,7 @@ public class ProductResponseDto {
     private String productName;
     private Long productPrice;
     private Long productQuantity;
+    private String description;
 
     public static ProductResponseDto of(Product product) {
         return ProductResponseDto.builder()
@@ -25,6 +26,7 @@ public class ProductResponseDto {
                 .productName(product.getProductName())
                 .productPrice(product.getProductPrice())
                 .productQuantity(product.getProductQuantity())
+                .description(product.getProductDescription())
                 .build();
     }
 }

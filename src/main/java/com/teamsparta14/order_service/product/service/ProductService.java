@@ -47,7 +47,11 @@ public class ProductService {
     @Transactional
     public ProductResponseDto addProduct(UUID storeId, ProductRequestDto requestDto) {
 
-        Product product = productRepository.save(new Product(requestDto, storeId));
+        AIDescription aiDescription = new AIDescription();
+
+        String description = aiDescription.getDescription(requestDto.getProductName());
+
+        Product product = productRepository.save(new Product(requestDto,storeId,description));
 
         return ProductResponseDto.of(product);
     }
