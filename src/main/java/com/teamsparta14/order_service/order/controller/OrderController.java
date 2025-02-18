@@ -27,11 +27,13 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @RequestBody OrderCreateDto createDto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails){
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestHeader(name = "access") String token
+    ){
 
         String user = customUserDetails.getUsername();
         log.info("user : {}",user);
-        return ResponseEntity.ok(ApiResponse.success(orderService.createOrder(createDto, user)));
+        return ResponseEntity.ok(ApiResponse.success(orderService.createOrder(createDto, user ,token)));
     }
 
     @DeleteMapping(path = "/{order-id}")

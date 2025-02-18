@@ -2,6 +2,7 @@ package com.teamsparta14.order_service.product.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +63,15 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                         )
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<Product> searchProductByIdList(ProductSearchDto requestDto) {
+
+        return queryFactory
+                .selectFrom(product)
+                .where(product.id.in(requestDto.getRequestIdList()))
+                .fetch();
+
     }
 }
