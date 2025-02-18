@@ -33,7 +33,7 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // 가게 목록 조회 (삭제되지 않은 가게만)
+    // 가게 조회 (삭제되지 않은 가게만)
     public List<StoreResponseDto> getAllStores() {
         return storeRepository.findByIsDeletedFalse()
                 .stream()
@@ -51,11 +51,8 @@ public class StoreService {
                 .isDeleted(false)
                 .build();
 
-        store.setCreatedBy(createdBy);
         Store savedStore = storeRepository.save(store);
-
         saveStoreCategories(savedStore, dto.getCategories());
-
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
 
@@ -74,13 +71,12 @@ public class StoreService {
         store.setStoreName(requestDto.getStoreName());
         store.setAddress(requestDto.getAddress());
         store.setPhone(requestDto.getPhone());
-        store.setModifiedBy(modifiedBy);
 
         storeRepository.save(store);
 
         // 기존 카테고리 삭제 후 재등록
         if (requestDto.getCategories() != null && !requestDto.getCategories().isEmpty()) {
-            storeCategoryRepository.deleteByStoreId(storeId); // 특정 가게의 모든 카테고리 삭제
+            storeCategoryRepository.deleteByStoreId(storeId);
             saveStoreCategories(store, requestDto.getCategories());
         }
 

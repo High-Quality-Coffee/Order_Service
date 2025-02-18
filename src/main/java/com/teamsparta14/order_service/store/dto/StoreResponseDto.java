@@ -16,20 +16,11 @@ public class StoreResponseDto {
     private List<String> categories;
 
     // 기본 생성자
-    public StoreResponseDto(Store store) {
-        this.id = store.getId();
-        this.storeName = store.getStoreName();
-        this.address = store.getAddress();
-        this.phone = store.getPhone();
-        this.categories = store.getCategories() != null ? store.getCategories() : Collections.emptyList();
-    }
-
-    // categories 리스트를 직접 전달받는 생성자 추가
     public StoreResponseDto(Store store, List<String> categories) {
         this.id = store.getId();
         this.storeName = store.getStoreName();
         this.address = store.getAddress();
         this.phone = store.getPhone();
-        this.categories = categories != null ? categories : Collections.emptyList();
+        this.categories = categories != null ? categories : Collections.emptyList(); //빈값이 아니면 카테고리
     }
 }

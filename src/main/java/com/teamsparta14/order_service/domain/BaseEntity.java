@@ -1,6 +1,5 @@
 package com.teamsparta14.order_service.domain;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
