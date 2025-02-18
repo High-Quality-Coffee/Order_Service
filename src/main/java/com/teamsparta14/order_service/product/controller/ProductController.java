@@ -51,7 +51,7 @@ public class ProductController {
     @PostMapping("/products")
     public ResponseEntity<ApiResponse<ProductResponseDto>> createProduct(@RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        ProductResponseDto responseDto = productService.addProduct(requestDto.getStore_id(), requestDto);
+        ProductResponseDto responseDto = productService.addProduct(requestDto.getStoreId(), requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
@@ -60,7 +60,16 @@ public class ProductController {
     @PutMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
 
-        ProductResponseDto responseDto = productService.updateProduct(requestDto.getStore_id(), productId, requestDto);
+        ProductResponseDto responseDto = productService.updateProduct(requestDto.getStoreId(), productId, requestDto);
+
+        return ResponseEntity.ok().body(ApiResponse.success(responseDto));
+    }
+
+    //상품 수량 업데이트
+    @PutMapping("/products/{productId}/order")
+    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProductQuantity(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
+
+        ProductResponseDto responseDto = productService.updateProductQuantity(productId, requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
