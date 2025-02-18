@@ -1,7 +1,6 @@
 package com.teamsparta14.order_service.order.repository;
 
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,8 +16,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -38,7 +40,10 @@ public class ProductClient {
                 .build()
                 .toUri();
 
-        List<UUID> requestIdList = orderProductRequests.stream().map(OrderProductRequest::getProductId).toList();
+        List<UUID> requestIdList = orderProductRequests.stream().map(OrderProductRequest::getProductId).collect(Collectors.toUnmodifiableList());
+        Map<String, List<UUID>> requestBody = new HashMap<>();
+        requestBody.put("requestIdList", requestIdList);
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -46,14 +51,15 @@ public class ProductClient {
 
         headers.add("access", token);
 
-        HttpEntity<List<UUID>> request = new HttpEntity<>(requestIdList, headers);
+        HttpEntity<Map<String, List<UUID>>> request = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
 
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ApiResponse<ProductListResponseDto> productResponse = objectMapper.readValue(response.getBody(), new TypeReference<ApiResponse<ProductListResponseDto>>() {});
+            ApiResponse<ProductListResponseDto> productResponse = objectMapper.readValue(response.getBody(), new TypeReference<ApiResponse<ProductListResponseDto>>() {
+            });
 
             return productResponse.getData();
         } catch (JsonProcessingException e) {
