@@ -27,4 +27,12 @@ public class ProductResponseDto {
                 .productQuantity(product.getProductQuantity())
                 .build();
     }
+
+    public void setStoreId(String storeId) {
+        this.storeId = UUID.fromString(storeId);
+    }
+
+    public void setProductId(String productId) {
+        this.productId = UUID.fromString(productId);
+    }
 }

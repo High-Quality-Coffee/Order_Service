@@ -1,6 +1,7 @@
 package com.teamsparta14.order_service.order.service;
 
 
+import com.teamsparta14.order_service.global.response.ProductClientResponse;
 import com.teamsparta14.order_service.order.dto.OrderCreateDto;
 import com.teamsparta14.order_service.order.dto.OrderProductRequest;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
@@ -22,7 +23,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,22 +43,12 @@ public class OrderService {
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
-        ProductListResponseDto responseDtoList = productClient.searchProductList(orderProductRequests,token);
+        List<ProductResponseDto> productClientResponse= productClient.searchProductList(orderProductRequests,token);
+
+        requestCompareToProductList(orderProductRequests , productClientResponse);
 
         Order order = createDto.from(userName);
          for (OrderProductRequest orderProductRequest : orderProductRequests) {
-
-
-
-
-//             if(product.getQuantity() < orderProductRequest.getQuantity()){
-//                 throw new IllegalArgumentException("Not Enough Product");
-//             }
-             //수량 체크 구현 예정
-             //이때 storeid와 productId를 사용하여 productClient 통해 http 통신으로 구현
-
-             //고민 되는 점  :  물품이 100개이면 100개의 통신을 해야하는데 너무 별로임;;
-             // productIdList와 storeId를 통해 한번에 구현?
 
 
              order.addOrderProductsList(OrderProduct.builder()
@@ -70,6 +63,28 @@ public class OrderService {
 
          return OrderResponse.from(orderRepository.save(order));
     }
+
+    private void requestCompareToProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> clienList) {
+
+        //client를 통해 얻은 데이터를 Map으로
+        Map<UUID, Long> productMap = clienList.stream()
+                .collect(Collectors.toMap(ProductResponseDto::getProductId,ProductResponseDto::getProductQuantity));
+
+        for (OrderProductRequest orderProductRequest : orderProductRequests) {
+            Long productQuantity = productMap.get(orderProductRequest.getProductId());
+
+            if (productQuantity < orderProductRequest.getQuantity()) {
+                throw new IllegalArgumentException("Not enough product in stock");
+            }
+            productMap.remove(orderProductRequest.getProductId());
+        }
+
+        if(!productMap.isEmpty()){
+            throw new IllegalArgumentException("product not found");
+        }
+
+    }
+
 
 
     @Transactional
