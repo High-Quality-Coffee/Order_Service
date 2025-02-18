@@ -1,7 +1,10 @@
 package com.teamsparta14.order_service.product.service;
 
+import com.teamsparta14.order_service.order.dto.OrderProductRequest;
+import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
@@ -101,13 +104,25 @@ public class ProductService {
 
         return ProductResponseDto.of(product);
     }
-    
+
     //상품 검색
     public List<ProductResponseDto> searchByTitle(UUID storeId, String keyword, Pageable pageable, SortBy sortBy, ProductStatus status) {
 
         if(keyword == null) keyword = "";
 
         List<Product> productList = productRepository.findByTitleContain(storeId, keyword,pageable, sortBy, status);
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(ProductResponseDto.of(product));
+        }
+
+        return responseDtoList;
+    }
+
+    public  List<ProductResponseDto> searchProduct(ProductSearchDto requestDto) {
+
+        List<Product> productList = productRepository.searchProductByIdList(requestDto);
         List<ProductResponseDto> responseDtoList = new ArrayList<>();
 
         for (Product product : productList) {

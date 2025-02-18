@@ -1,8 +1,11 @@
 package com.teamsparta14.order_service.product.controller;
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
+import com.teamsparta14.order_service.order.dto.OrderProductRequest;
+import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.product.service.ProductService;
@@ -107,5 +110,12 @@ public class ProductController {
     public ResponseEntity<ApiResponse<ProductResponseDto>> deleteProduct(@PathVariable("productId") UUID productId) {
 
         return ResponseEntity.ok().body(ApiResponse.success(productService.deleteProduct(productId)));
+    }
+
+
+    @PostMapping("/products/search")
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> searchProduct(@RequestBody ProductSearchDto requestDto) {
+
+        return ResponseEntity.ok().body(ApiResponse.success(productService.searchProduct(requestDto)));
     }
 }

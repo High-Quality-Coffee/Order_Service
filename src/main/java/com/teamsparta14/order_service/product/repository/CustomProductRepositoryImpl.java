@@ -3,6 +3,7 @@ package com.teamsparta14.order_service.product.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
@@ -46,6 +47,16 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                         )
                         .fetchOne()
         );
+    }
+
+    @Override
+    public List<Product> searchProductByIdList(ProductSearchDto requestDto) {
+
+        return queryFactory
+                .selectFrom(product)
+                .where(product.id.in(requestDto.getRequestIdList()))
+                .fetch();
+
     }
 
     //공통 쿼리 메서드
