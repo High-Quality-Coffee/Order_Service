@@ -54,7 +54,7 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final ComparablePath<java.util.UUID> storeId = createComparable("storeId", java.util.UUID.class);
 
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
+    public final StringPath userName = createString("userName");
 
     public QOrder(String variable) {
         this(Order.class, forVariable(variable), INITS);

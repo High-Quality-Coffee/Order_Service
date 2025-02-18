@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 public class OrderResponse {
     private UUID orderId;
-    private Long userId ;
+    private String userName ;
     private UUID storeId;
     private List<UUID> orderProducts;
     private UUID destId;
@@ -24,7 +24,7 @@ public class OrderResponse {
     public static OrderResponse from(Order order){
         return OrderResponse.builder()
                 .orderId(order.getOrder())
-                .userId(order.getUserId())
+                .userName(order.getUserName())
                 .storeId(order.getStoreId())
                 .orderProducts(order.getOrderProducts().stream()
                         .map(OrderProduct::getProductId)

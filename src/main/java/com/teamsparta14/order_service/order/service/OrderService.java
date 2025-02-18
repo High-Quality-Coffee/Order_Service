@@ -89,7 +89,7 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
-    public List<OrderResponse> searchOrders(String userName, int page, int limit,
+    public List<OrderResponse> searchOrders(Long userId, int page, int limit,
                                           Boolean isAsc, String orderBy) {
         Sort.Direction direction;
         if(isAsc){

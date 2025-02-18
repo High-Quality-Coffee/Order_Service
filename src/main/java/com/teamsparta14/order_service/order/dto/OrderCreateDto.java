@@ -21,9 +21,9 @@ public class OrderCreateDto {
     private List<OrderProductRequest> orderProductRequests;
     private OrderType orderType;
 
-    public Order from(Long userId){
+    public Order from(String userName){
         return Order.builder()
-                .userId(userId)
+                .userName(userName)
                 .storeId(storeId)
                 .orderProducts(new ArrayList<>())
                 .destId(destId)

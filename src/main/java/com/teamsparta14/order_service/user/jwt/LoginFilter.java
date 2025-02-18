@@ -56,10 +56,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             try {
                 // JSON 데이터를 읽어서 파싱
                 ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, String> requestMap = objectMapper.readValue(request.getInputStream(), Map.class);
+                Map requestMap = objectMapper.readValue(request.getInputStream(), Map.class);
 
-                username = requestMap.get("username");
-                password = requestMap.get("password");
+                username = String.valueOf(requestMap.get("username"));
+                password = String.valueOf(requestMap.get("password"));
             } catch (IOException e) {
                 throw new AuthenticationServiceException("Failed to parse JSON request", e);
             }
