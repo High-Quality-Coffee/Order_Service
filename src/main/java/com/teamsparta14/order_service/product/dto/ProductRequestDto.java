@@ -9,7 +9,8 @@ import java.util.UUID;
 @Setter
 public class ProductRequestDto {
 
-    private UUID store_id;
-    private String product_name;
-    private int product_price;
+    private UUID storeId;
+    private String productName;
+    private int productPrice;
+    private int productQuantity;
 }

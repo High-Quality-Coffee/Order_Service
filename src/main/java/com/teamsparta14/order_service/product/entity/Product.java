@@ -25,23 +25,28 @@ public class Product extends BaseEntity {
     private UUID storeId;
     private String productName;
     private int productPrice;
+    private int productQuantity;
     private boolean isDeleted;
     //private boolean isHidden; 숨김처리 필요
 
     public Product(ProductRequestDto requestDto, UUID storeId) {
         this.storeId = storeId;
-        this.productName = requestDto.getProduct_name();
-        this.productPrice = requestDto.getProduct_price();
+        this.productName = requestDto.getProductName();
+        this.productPrice = requestDto.getProductPrice();
         this.isDeleted = false;
     }
 
     public void upadte(UUID id, ProductRequestDto requestDto) {
         this.id = id;
-        this.productName = requestDto.getProduct_name();
-        this.productPrice = requestDto.getProduct_price();
+        this.productName = requestDto.getProductName();
+        this.productPrice = requestDto.getProductPrice();
     }
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void updateOrderCount(int productQuantity) {
+        this.productQuantity = productQuantity;
     }
 }

@@ -51,7 +51,7 @@ public class ProductService {
 
         return ProductResponseDto.of(product);
     }
-    
+
     //상품 수정
     @Transactional
     public ProductResponseDto updateProduct(UUID storeId, UUID productId, ProductRequestDto requestDto) {
@@ -72,6 +72,17 @@ public class ProductService {
 
         product.delete();
         product.setDeleted(LocalDateTime.now(), "User");
+
+        return ProductResponseDto.of(product);
+    }
+
+    //상품 수량 업데이트
+    public ProductResponseDto updateProductQuantity(UUID productId, ProductRequestDto requestDto) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("수정할 상품을 찾을 수 없습니다."));
+
+        product.updateOrderCount(requestDto.getProductQuantity());
 
         return ProductResponseDto.of(product);
     }
