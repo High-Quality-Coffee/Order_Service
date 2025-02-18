@@ -1,14 +1,16 @@
 package com.teamsparta14.order_service.product.controller;
 
+import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.product.service.ProductService;
+import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,7 @@ public class ProductController {
 
     //상품 전체 조회
     @GetMapping("/products")
-    public ResponseEntity<List<ProductResponseDto>> getProducts(
+    public ResponseEntity<ApiResponse<List<ProductResponseDto>>> getProducts(
             @RequestParam("store_id") UUID storeId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -33,42 +35,40 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size);
         List<ProductResponseDto> products = productService.getProducts(storeId, pageable, sortBy);
 
-        return ResponseEntity.status(HttpStatus.OK).body(products);
+        return ResponseEntity.ok().body(ApiResponse.success(products));
     }
 
     //상품 상세 조회
     @GetMapping("/products/{productId}")
-    public ResponseEntity<ProductResponseDto> getProductDetails(@PathVariable("productId") UUID productId) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> getProductDetails(@PathVariable("productId") UUID productId) {
 
         ProductResponseDto responseDto = productService.getProductDetails(productId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
 
     //상품 등록
     @PostMapping("/products")
-    public ResponseEntity<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> createProduct(@RequestBody ProductRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         ProductResponseDto responseDto = productService.addProduct(requestDto.getStore_id(), requestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
 
     //상품 수정
     @PutMapping("/products/{productId}")
-    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
 
         ProductResponseDto responseDto = productService.updateProduct(requestDto.getStore_id(), productId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(responseDto);
+        return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
 
     //상품 삭제
     @PostMapping("/products/{productId}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("productId") UUID productId) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> deleteProduct(@PathVariable("productId") UUID productId) {
 
-        productService.deleteProduct(productId);
-
-        return ResponseEntity.status(HttpStatus.OK).body("상품 삭제 완료");
+        return ResponseEntity.ok().body(ApiResponse.success(productService.deleteProduct(productId)));
     }
 }
