@@ -5,9 +5,11 @@ import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductSearchDto;
+import com.teamsparta14.order_service.product.entity.Description;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
+import com.teamsparta14.order_service.product.repository.DescriptionRepository;
 import com.teamsparta14.order_service.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final DescriptionRepository descriptionRepository;
 
     //상품 전체 조회
     public List<ProductResponseDto> getProducts(UUID storeId, Pageable pageable, SortBy sortBy, ProductStatus status) {
@@ -51,7 +54,20 @@ public class ProductService {
     @Transactional
     public ProductResponseDto addProduct(UUID storeId, ProductRequestDto requestDto) {
 
-        Product product = productRepository.save(new Product(requestDto, storeId));
+        AIDescription aiDescription = new AIDescription();
+
+        String aiRequest = requestDto.getProductName() + "란 음식을 50자 이내로 설명해줘";
+
+        String aiResponse = aiDescription.getDescription(aiRequest);
+
+        Description description =  Description.builder()
+                .request(aiRequest)
+                .response(aiResponse)
+                .build();
+
+        descriptionRepository.save(description);
+
+        Product product = productRepository.save(new Product(requestDto,storeId,aiResponse));
 
         return ProductResponseDto.of(product);
     }

@@ -49,12 +49,16 @@ public class Product extends BaseEntity {
     @Builder.Default
     private ProductStatus status = ProductStatus.ON_SALE;
 
-    public Product(ProductRequestDto requestDto, UUID storeId) {
+    @Column(length = 100)
+    private String productDescription;
+
+    public Product(ProductRequestDto requestDto, UUID storeId , String productDescription) {
         this.storeId = storeId;
         this.productName = requestDto.getProductName();
         this.productPrice = requestDto.getProductPrice();
         this.productQuantity = requestDto.getProductQuantity();
         this.isDeleted = false;
+        this.productDescription = productDescription;
     }
 
     public void update(ProductRequestDto requestDto) {
