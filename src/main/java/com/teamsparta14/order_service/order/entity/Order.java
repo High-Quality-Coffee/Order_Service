@@ -3,6 +3,8 @@ package com.teamsparta14.order_service.order.entity;
 
 import com.teamsparta14.order_service.domain.BaseEntity;
 import com.teamsparta14.order_service.order.dto.OrderType;
+import com.teamsparta14.order_service.payment.entity.Payment;
+import com.teamsparta14.order_service.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
