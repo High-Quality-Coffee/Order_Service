@@ -1,4 +1,4 @@
-package com.teamsparta14.order_service.order.entity;
+package com.teamsparta14.order_service.payment.entity;
 
 
 public enum PaymentStatus {

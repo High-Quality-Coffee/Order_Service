@@ -52,7 +52,7 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final EnumPath<com.teamsparta14.order_service.order.dto.OrderType> orderType = createEnum("orderType", com.teamsparta14.order_service.order.dto.OrderType.class);
 
-    public final QPayment payment;
+    public final com.teamsparta14.order_service.payment.entity.QPayment payment;
 
     public final ComparablePath<java.util.UUID> storeId = createComparable("storeId", java.util.UUID.class);
 
@@ -76,7 +76,7 @@ public class QOrder extends EntityPathBase<Order> {
 
     public QOrder(Class<? extends Order> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.payment = inits.isInitialized("payment") ? new QPayment(forProperty("payment"), inits.get("payment")) : null;
+        this.payment = inits.isInitialized("payment") ? new com.teamsparta14.order_service.payment.entity.QPayment(forProperty("payment"), inits.get("payment")) : null;
     }
 
 }
