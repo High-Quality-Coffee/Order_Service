@@ -44,7 +44,10 @@ public class Product extends BaseEntity {
     @NotNull
     @ColumnDefault("false")
     private boolean isDeleted;
-    //private boolean isHidden; 숨김처리 필요
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private ProductStatus status = ProductStatus.ON_SALE;
 
     public Product(ProductRequestDto requestDto, UUID storeId) {
         this.storeId = storeId;
@@ -65,9 +68,17 @@ public class Product extends BaseEntity {
     }
 
     public void updateOrderCount(Long productQuantity) {
+
         if (productQuantity < 0) {
             throw new IllegalArgumentException("가격은 0원 이상이어야 합니다.");
+        } else if (productQuantity == 0) {
+            status = ProductStatus.SOLD_OUT;
         }
+
         this.productQuantity = productQuantity;
+    }
+
+    public void updateStatus(ProductStatus status) {
+        this.status = status;
     }
 }
