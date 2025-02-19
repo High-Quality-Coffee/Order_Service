@@ -3,6 +3,7 @@ package com.teamsparta14.order_service.store.entity;
 import com.teamsparta14.order_service.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -16,7 +17,8 @@ import java.util.UUID;
 public class Category extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator
+    @Column(name = "category_id")
     private UUID id;
 
     @Column(name = "category_name", nullable = false, length = 20)

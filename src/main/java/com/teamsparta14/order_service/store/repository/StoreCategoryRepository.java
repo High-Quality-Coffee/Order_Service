@@ -1,5 +1,6 @@
 package com.teamsparta14.order_service.store.repository;
 
+import com.teamsparta14.order_service.store.entity.Store;
 import com.teamsparta14.order_service.store.entity.StoreCategory;
 import com.teamsparta14.order_service.store.entity.StoreCategoryId;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,12 +16,11 @@ import java.util.UUID;
 @Repository
 public interface StoreCategoryRepository extends JpaRepository<StoreCategory, StoreCategoryId> {
 
-    List<StoreCategory> findByStoreId(UUID storeId);
+    // 기존: UUID storeId → 수정: Store store
+    List<StoreCategory> findByStoreId(Store store);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM StoreCategory sc WHERE sc.store.id = :storeId")
-    void deleteByStoreId(@Param("storeId") UUID storeId);
+    @Query("DELETE FROM StoreCategory sc WHERE sc.storeId.id = :storeId")
+    void deleteByStore(@Param("storeId") UUID storeId);
 }
-
-

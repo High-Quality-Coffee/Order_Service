@@ -27,11 +27,19 @@ public class StoreService {
 
     // [조회] 가게 ID 기반 카테고리 이름 리스트
     private List<String> getCategoryNames(UUID storeId) {
-        List<StoreCategory> storeCategories = storeCategoryRepository.findByStoreId(storeId);
+        // 1. UUID를 Store 엔티티로 변환 (storeId를 사용하여 Store 객체 찾기)
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
+
+        // 2. Store 객체를 사용하여 StoreCategory 목록 조회
+        List<StoreCategory> storeCategories = storeCategoryRepository.findByStoreId(store);
+
+        // 3. 카테고리 이름 리스트 반환 (null 체크 추가)
         return storeCategories.stream()
-                .map(storeCategory -> storeCategory.getCategory().getCategoryName())
+                .map(storeCategory -> storeCategory.getCategoryId() != null ? storeCategory.getCategoryId().getCategoryName() : "Unknown Category")
                 .collect(Collectors.toList());
     }
+
 
     // [조회] 삭제되지 않은 가게만
     public List<StoreResponseDto> getAllStores() {
@@ -76,14 +84,14 @@ public class StoreService {
 
         // 기존 카테고리 삭제 후 재등록
         if (requestDto.getCategories() != null && !requestDto.getCategories().isEmpty()) {
-            storeCategoryRepository.deleteByStoreId(storeId);
+            storeCategoryRepository.deleteByStore(storeId); // 수정된 부분
             saveStoreCategories(store, requestDto.getCategories());
         }
 
         return new StoreResponseDto(store, getCategoryNames(storeId));
     }
 
-    //[삭제] 가게
+    // [삭제] 가게
     @Transactional
     public void deleteStore(UUID storeId, String deletedBy) {
         Store store = storeRepository.findById(storeId)
@@ -99,11 +107,11 @@ public class StoreService {
         storeRepository.save(store);
     }
 
-    //카테고리 저장
+    // [카테고리 저장]
     private void saveStoreCategories(Store store, List<String> categoryNames) {
         List<Category> categories = categoryRepository.findByCategoryNameIn(categoryNames);
         List<StoreCategory> storeCategories = categories.stream()
-                .map(category -> new StoreCategory(store, category)) // 복합 키 기반 저장
+                .map(category -> new StoreCategory(store, category)) // 필드명 변경에 맞게 수정
                 .collect(Collectors.toList());
         storeCategoryRepository.saveAll(storeCategories);
     }
