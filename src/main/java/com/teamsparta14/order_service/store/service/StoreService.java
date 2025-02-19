@@ -29,7 +29,6 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
 
-
     // [조회] 가게 ID 기반 카테고리 이름 리스트
     private List<String> getCategoryNames(UUID storeId) {
         Store store = storeRepository.findById(storeId)
@@ -96,7 +95,6 @@ public class StoreService {
         Category savedCategory = categoryRepository.save(category);
         return new CategoryResponseDto(savedCategory);
     }
-
 
     // [수정] 가게 정보
     @Transactional
