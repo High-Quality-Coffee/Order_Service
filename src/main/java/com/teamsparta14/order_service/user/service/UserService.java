@@ -4,6 +4,7 @@ import com.teamsparta14.order_service.global.enums.Role;
 import com.teamsparta14.order_service.global.exception.BaseException;
 import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.global.response.ResponseCode;
+import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.dto.UserRequestDTO;
 import com.teamsparta14.order_service.user.dto.UserResponseDTO;
 import com.teamsparta14.order_service.user.entity.UserEntity;
@@ -17,8 +18,12 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +40,7 @@ public class UserService {
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
-        userEntity.setRole(Role.USER);
+        userEntity.setRole(Role.ROLE_USER);
         userRepository.save(userEntity);
     }
 
@@ -47,7 +52,7 @@ public class UserService {
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setRole(Role.MASTER);
+        userEntity.setRole(Role.ROLE_MASTER);
         userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
         userRepository.save(userEntity);
     }
@@ -60,7 +65,7 @@ public class UserService {
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
-        userEntity.setRole(Role.OWNER);
+        userEntity.setRole(Role.ROLE_OWNER);
         userRepository.save(userEntity);
     }
 
@@ -72,7 +77,7 @@ public class UserService {
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
-        userEntity.setRole(Role.MANAGER);
+        userEntity.setRole(Role.ROLE_MANAGER);
         userRepository.save(userEntity);
     }
 
@@ -82,5 +87,16 @@ public class UserService {
         UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(BaseException::new);
         return modelMapper.map(userEntity,UserResponseDTO.class);
     }
+
+    //회원 탈퇴 (soft-delete)
+    @Transactional
+    public void deleteUser(CustomUserDetails customUserDetails){
+        String username = customUserDetails.getUsername();
+        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() ->
+                new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        userEntity.delete_user(true);
+        userEntity.setDeleted(LocalDateTime.now(), username);
+    }
+
 
 }
