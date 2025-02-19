@@ -4,8 +4,9 @@ package com.teamsparta14.order_service.product.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.teamsparta14.order_service.product.entity.Description;
+import com.teamsparta14.order_service.product.repository.DescriptionRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -33,8 +34,9 @@ public class AIDescription {
                 .build()
                 .toUri();
 
+
         String requestBody = String.format(
-                "{\"contents\": [{\"parts\": [{\"text\": \"%s 란 음식을 50자 이내로 설명해줘\"}]}]}",
+                "{\"contents\": [{\"parts\": [{\"text\": \"%s\"}]}]}",
                 productName
         );
 
@@ -47,7 +49,9 @@ public class AIDescription {
 
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(uri, request, String.class);
 
-        return parseDescriptionFromResponse(responseEntity.getBody());
+        String response = parseDescriptionFromResponse(responseEntity.getBody());
+
+        return response;
 
 
     }
