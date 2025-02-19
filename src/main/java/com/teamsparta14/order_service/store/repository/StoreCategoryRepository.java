@@ -16,11 +16,10 @@ import java.util.UUID;
 @Repository
 public interface StoreCategoryRepository extends JpaRepository<StoreCategory, StoreCategoryId> {
 
-    // 기존: UUID storeId → 수정: Store store
     List<StoreCategory> findByStoreId(Store store);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM StoreCategory sc WHERE sc.storeId.id = :storeId")
-    void deleteByStore(@Param("storeId") UUID storeId);
+    @Query("DELETE FROM StoreCategory sc WHERE sc.storeId = :store")
+    void deleteByStore(Store store);
 }

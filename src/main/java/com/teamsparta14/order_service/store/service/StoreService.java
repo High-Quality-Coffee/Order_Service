@@ -1,15 +1,19 @@
 package com.teamsparta14.order_service.store.service;
 
-import com.teamsparta14.order_service.store.dto.StoreRequestDto;
-import com.teamsparta14.order_service.store.dto.StoreResponseDto;
-import com.teamsparta14.order_service.store.dto.StoreUpdateRequestDto;
+import com.teamsparta14.order_service.global.enums.Role;
+import com.teamsparta14.order_service.store.dto.*;
 import com.teamsparta14.order_service.store.entity.Category;
 import com.teamsparta14.order_service.store.entity.Store;
 import com.teamsparta14.order_service.store.entity.StoreCategory;
 import com.teamsparta14.order_service.store.repository.StoreCategoryRepository;
 import com.teamsparta14.order_service.store.repository.CategoryRepository;
 import com.teamsparta14.order_service.store.repository.StoreRepository;
+import com.teamsparta14.order_service.user.entity.UserEntity;
+import com.teamsparta14.order_service.user.jwt.JWTUtil;
+import com.teamsparta14.order_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,24 +29,21 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
 
+
     // [조회] 가게 ID 기반 카테고리 이름 리스트
     private List<String> getCategoryNames(UUID storeId) {
-        // 1. UUID를 Store 엔티티로 변환 (storeId를 사용하여 Store 객체 찾기)
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
-        // 2. Store 객체를 사용하여 StoreCategory 목록 조회
         List<StoreCategory> storeCategories = storeCategoryRepository.findByStoreId(store);
 
-        // 3. 카테고리 이름 리스트 반환 (null 체크 추가)
         return storeCategories.stream()
                 .map(storeCategory -> storeCategory.getCategoryId() != null ? storeCategory.getCategoryId().getCategoryName() : "Unknown Category")
                 .collect(Collectors.toList());
     }
 
-
     // [조회] 삭제되지 않은 가게만
-    public List<StoreResponseDto> getAllStores() {
+    public List<StoreResponseDto> getAllStores(Pageable pageable) {
         return storeRepository.findByIsDeletedFalse()
                 .stream()
                 .map(store -> new StoreResponseDto(store, getCategoryNames(store.getId())))
@@ -52,6 +53,22 @@ public class StoreService {
     // [등록] 가게 (owner만)
     @Transactional
     public StoreResponseDto createStore(StoreRequestDto dto, String createdBy) {
+
+//        // 1. HTTP 요청에서 JWT 토큰 가져오기
+//        String token = extractToken(request);
+//        if (token == null) {
+//            throw new RuntimeException("JWT 토큰이 필요합니다.");
+//        }
+//
+//        // 2. 현재 로그인한 사용자의 역할(Role) 확인
+//        String role = jwtUtil.getRole(token);
+//        if (!Role.OWNER.name().equals(role)) {
+//            throw new RuntimeException("가게를 등록할 권한이 없습니다.");
+//        }
+//
+//        // 3. 현재 로그인한 사용자의 username 가져오기
+//        String username = jwtUtil.getUsername(token);
+
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
                 .address(dto.getAddress())
@@ -61,30 +78,44 @@ public class StoreService {
 
         Store savedStore = storeRepository.save(store);
         saveStoreCategories(savedStore, dto.getCategories());
+
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
 
+    // [등록] 카테고리 (관리자만)
+    @Transactional
+    public CategoryResponseDto createCategory(CategoryRequestDto dto) {
+
+        // 카테고리 중복 체크
+
+        // 카테고리 저장
+        Category category = Category.builder()
+                .categoryName(dto.getCategoryName())
+                .build();
+
+        Category savedCategory = categoryRepository.save(category);
+        return new CategoryResponseDto(savedCategory);
+    }
+
+
     // [수정] 가게 정보
     @Transactional
-    public StoreResponseDto updateStore(UUID storeId, StoreUpdateRequestDto requestDto, String modifiedBy) {
+    public StoreResponseDto updateStore(UUID storeId, StoreUpdateRequestDto requestDto, String modifiedBy, String role) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
-        // OWNER 본인 가게인지 검증
-        if (!store.getCreatedBy().equals(modifiedBy)) {
+        if (!store.getCreatedBy().equals(modifiedBy) && !"ADMIN".equals(role)) {
             throw new RuntimeException("해당 가게를 수정할 권한이 없습니다.");
         }
 
-        // 가게 정보 업데이트
         store.setStoreName(requestDto.getStoreName());
         store.setAddress(requestDto.getAddress());
         store.setPhone(requestDto.getPhone());
 
         storeRepository.save(store);
 
-        // 기존 카테고리 삭제 후 재등록
         if (requestDto.getCategories() != null && !requestDto.getCategories().isEmpty()) {
-            storeCategoryRepository.deleteByStore(storeId); // 수정된 부분
+            storeCategoryRepository.deleteByStore(store);
             saveStoreCategories(store, requestDto.getCategories());
         }
 
