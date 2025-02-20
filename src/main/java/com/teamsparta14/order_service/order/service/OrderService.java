@@ -23,7 +23,11 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 
 @Service
@@ -36,47 +40,44 @@ public class OrderService {
     private final JWTUtil jwtUtil;
 
 
-    public OrderResponse createOrder(OrderCreateDto createDto ,String token) {
+    public OrderResponse createOrder(OrderCreateDto createDto,
+                                     String token) {
 
         String userName = jwtUtil.getUsername(token);
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
-        Object store = storesClient.searchStore(createDto.getStoreId(),token);
-
-        if(null == store){
-            throw new IllegalArgumentException("store Not found");
-        }
+        Optional.ofNullable(storesClient.searchStore(createDto.getStoreId(), token))
+                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
+        List<UUID> productIds = orderProductRequests.stream().map(OrderProductRequest::getProductId).toList();
 
-        List<ProductResponseDto> productClientResponse = productClient.searchProductList(orderProductRequests, token);
-
-
-        requestCompareToClientProductList(orderProductRequests,productClientResponse);
-
+        List<ProductResponseDto> productResponses = productClient.searchProductList(productIds, token);
+        requestCompareToClientProductList(orderProductRequests, productResponses);
 
         MyOrder order = createDto.from(userName);
-         for (OrderProductRequest orderProductRequest : orderProductRequests) {
+        for (OrderProductRequest orderProductRequest : orderProductRequests) {
 
-             order.addOrderProductsList(OrderProduct.builder()
-                             .order(order)
-                             .productId(orderProductRequest.getProductId())
-                             .quantity(orderProductRequest.getQuantity())
-                             .price(orderProductRequest.getPrice())
-                     .build());
-         }
+            order.addOrderProductsList(OrderProduct.builder()
+                    .order(order)
+                    .productId(orderProductRequest.getProductId())
+                    .quantity(orderProductRequest.getQuantity())
+                    .price(orderProductRequest.getPrice())
+                    .build());
+        }
 
-         order.createPayment();
-
-         return OrderResponse.from(orderRepository.save(order));
+        order.createPayment();
+        return OrderResponse.from(orderRepository.save(order));
     }
 
-    private void requestCompareToClientProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> productClientResponse) {
+    private void requestCompareToClientProductList(List<OrderProductRequest> orderProductRequests,
+                                                   List<ProductResponseDto> productResponses) {
 
+        Map<UUID, OrderProductRequest> productMap = orderProductRequests
+                .stream()
+                .collect(toMap(OrderProductRequest::getProductId, Function.identity()));
 
-        Map<UUID,OrderProductRequest> productMap = createOrderProductMap(orderProductRequests);
-
-        for (ProductResponseDto product : productClientResponse) {
+        for (ProductResponseDto product : productResponses) {
             if (!compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
                 throw new IllegalArgumentException("Not enough product in stock");
             }
@@ -89,39 +90,24 @@ public class OrderService {
 
     }
 
-    private boolean compareOrderProductToClientProduct(OrderProductRequest orderProduct, ProductResponseDto clientProduct) {
+    private boolean compareOrderProductToClientProduct(OrderProductRequest orderProduct,
+                                                       ProductResponseDto clientProduct) {
 
-        if(orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
+        if (orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
 
-        if(orderProduct.getPrice().equals(clientProduct.getProductPrice())) return false;
-
-        return true;
+        return !orderProduct.getPrice().equals(clientProduct.getProductPrice());
     }
-
-
-
-    private Map<UUID,OrderProductRequest> createOrderProductMap(List<OrderProductRequest> orderProductRequests){
-
-        Map<UUID,OrderProductRequest> list = new HashMap<>();
-
-        orderProductRequests.forEach(product -> {
-            list.put(product.getProductId(),product);
-        });
-
-       return list;
-    }
-
 
     @Transactional
-    public OrderResponse deleteOrder(UUID orderId,String token) {
+    public OrderResponse deleteOrder(UUID orderId, String token) {
 
         String userName = jwtUtil.getUsername(token);
 
         MyOrder order = orderRepository.findByOrderIdAndDeletedAtIsNull(orderId).orElseThrow(
-                ()-> new IllegalArgumentException("Order Not Found")
+                () -> new IllegalArgumentException("Order Not Found")
         );
 
-        if( !order.isOwner(userName) ){
+        if (!order.isOwner(userName)) {
             throw new IllegalArgumentException("Not Own Order");
         }
 
@@ -129,24 +115,24 @@ public class OrderService {
 
         Duration duration = Duration.between(orderTime, LocalDateTime.now());
 
-        if(duration.toMinutes() > 5){
+        if (duration.toMinutes() > 5) {
             throw new IllegalArgumentException("The order cancellation time has expired.");
         }
 
-        order.setDeleted(LocalDateTime.now(),userName);
+        order.setDeleted(LocalDateTime.now(), userName);
 
         return OrderResponse.from(order);
     }
 
-    public OrderResponse getOrderById(UUID orderId,String token) {
+    public OrderResponse getOrderById(UUID orderId, String token) {
 
         String userName = jwtUtil.getUsername(token);
 
         MyOrder order = orderRepository.findOrderWithProductsWithPayment(orderId).orElseThrow(
-                ()-> new IllegalArgumentException("Order Not Found")
+                () -> new IllegalArgumentException("Order Not Found")
         );
 
-        if( !order.isOwner(userName) ){
+        if (!order.isOwner(userName)) {
             throw new IllegalArgumentException("Not Own Order");
         }
 
@@ -154,15 +140,15 @@ public class OrderService {
     }
 
     public List<OrderResponse> searchOrders(String token, int page, int limit,
-                                          Boolean isAsc, String orderBy) {
+                                            Boolean isAsc, String orderBy) {
 
         String userName = jwtUtil.getUsername(token);
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Pageable pageable = PageRequest.of(page-1, limit, Sort.by(direction, orderBy));
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, orderBy));
 
-        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName,pageable).map(OrderResponse::from);
+        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName, pageable).map(OrderResponse::from);
 
         return orderPage.toList();
     }
@@ -173,10 +159,10 @@ public class OrderService {
         String userName = jwtUtil.getUsername(token);
 
         MyOrder order = orderRepository.findById(orderUpdateRequest.getOrderId()).orElseThrow(
-                ()-> new IllegalArgumentException("Order Not Found")
+                () -> new IllegalArgumentException("Order Not Found")
         );
 
-        if( !order.isOwner(userName) ){
+        if (!order.isOwner(userName)) {
             throw new IllegalArgumentException("Not Own Order");
         }
 
