@@ -119,19 +119,55 @@ public class StoreService {
         storeCategoryRepository.saveAll(storeCategories);
     }
 
+    // [조회] 모든 카테고리
+    public List<CategoryResponseDto> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(CategoryResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    // [조회] 특정 카테고리
+    public CategoryResponseDto getCategoryById(UUID categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("해당 카테고리를 찾을 수 없습니다."));
+        return new CategoryResponseDto(category);
+    }
+
     // [등록] 카테고리
     @Transactional
     public CategoryResponseDto createCategory(CategoryRequestDto dto) {
 
         // 카테고리 중복 체크
+        boolean exists = categoryRepository.existsByCategoryName(dto.getCategoryName());
+        if (exists) {
+            throw new IllegalArgumentException("이미 존재하는 카테고리입니다.");
+        }
 
-        // 카테고리 저장
         Category category = Category.builder()
                 .categoryName(dto.getCategoryName())
                 .build();
 
         Category savedCategory = categoryRepository.save(category);
         return new CategoryResponseDto(savedCategory);
+    }
+
+    // [수정] 카테고리
+    @Transactional
+    public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("해당 카테고리를 찾을 수 없습니다."));
+        category.setCategoryName(dto.getCategoryName());
+        return new CategoryResponseDto(categoryRepository.save(category));
+    }
+
+    // [삭제] 카테고리
+    @Transactional
+    public String deleteCategory(UUID categoryId) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new RuntimeException("해당 카테고리를 찾을 수 없습니다.");
+        }
+        categoryRepository.deleteById(categoryId);
+        return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
     }
 
 }
