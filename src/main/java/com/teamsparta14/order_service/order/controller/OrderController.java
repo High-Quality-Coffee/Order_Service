@@ -27,56 +27,52 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @RequestBody OrderCreateDto createDto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestHeader(name = "access") String token
     ){
 
-        String user = customUserDetails.getUsername();
-        log.info("user : {}",user);
-        return ResponseEntity.ok(ApiResponse.success(orderService.createOrder(createDto, user ,token)));
+        return ResponseEntity.ok(ApiResponse.success(orderService.createOrder(createDto ,token)));
     }
 
     @DeleteMapping(path = "/{order-id}")
     public ResponseEntity<ApiResponse<OrderResponse>> deleteOrder(
             @PathVariable(name = "order-id") UUID orderId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails){
-        String user = customUserDetails.getUsername();
-        log.info("user : {}",user);
-        log.info("orderId : {}",orderId);
-        return ResponseEntity.ok(ApiResponse.success(orderService.deleteOrder(orderId,user)));
+            @RequestHeader(name = "access") String token) {
+
+
+        log.info("orderId : {}", orderId);
+        return ResponseEntity.ok(ApiResponse.success(orderService.deleteOrder(orderId, token)));
     }
 
     @GetMapping(path = "/{order-id}")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(
             @PathVariable(name = "order-id") UUID orderId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails){
-        String user = customUserDetails.getUsername();
-        log.info("user : {}",user);
+            @RequestHeader(name = "access") String token){
+
         log.info("orderId : {}",orderId);
 
-        return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(orderId,user)));
+        return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(orderId,token)));
     }
 
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrderByPage(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
-            @RequestParam(name = "page") int page,
-            @RequestParam(name = "limit") int limit,
-            @RequestParam(name = "isAsc") Boolean isAsc,
+            @RequestHeader(name = "access") String token,
+            @RequestParam(name = "page", defaultValue = "10") int page,
+            @RequestParam(name = "limit", defaultValue = "100") int limit,
+            @RequestParam(name = "isAsc" , defaultValue = "true") Boolean isAsc,
             @RequestParam(name = "orderBy") String orderBy){
 
 
-        return ResponseEntity.ok(ApiResponse.success(orderService.searchOrders(customUserDetails.getUsername(),page,limit,isAsc,orderBy)));
+        return ResponseEntity.ok(ApiResponse.success(orderService.searchOrders(token,page,limit,isAsc,orderBy)));
     }
 
 
     @PutMapping
     public ResponseEntity<OrderResponse> updateOrder(
             @RequestBody OrderUpdateRequest orderUpdateRequest,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader(name = "access") String token
     ){
-        String userName = customUserDetails.getUsername();
-        return ResponseEntity.ok(orderService.updateOrder(orderUpdateRequest, userName));
+
+        return ResponseEntity.ok(orderService.updateOrder(orderUpdateRequest,token));
     }
 }

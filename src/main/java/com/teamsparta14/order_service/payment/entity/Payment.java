@@ -2,7 +2,7 @@ package com.teamsparta14.order_service.payment.entity;
 
 
 import com.teamsparta14.order_service.domain.BaseEntity;
-import com.teamsparta14.order_service.order.entity.Order;
+import com.teamsparta14.order_service.order.entity.MyOrder;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -23,7 +23,7 @@ public class Payment extends BaseEntity {
     private UUID paymentId;
 
     @OneToOne(mappedBy = "payment")
-    private Order order;
+    private MyOrder order;
 
     @Column(name = "user_name")
     private String userName;

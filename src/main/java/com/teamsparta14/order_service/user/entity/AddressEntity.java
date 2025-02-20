@@ -2,17 +2,17 @@ package com.teamsparta14.order_service.user.entity;
 
 import com.teamsparta14.order_service.domain.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
 @Entity
-@Setter
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "p_address")
 public class AddressEntity extends BaseEntity {
     @Id
