@@ -73,10 +73,11 @@ public class OrderService {
     private void requestCompareToClientProductList(List<OrderProductRequest> orderProductRequests,
                                                    List<ProductResponseDto> productResponses) {
 
+        //Map에 요청한 물품에 따라 key : productId,value : Product를 넣음
         Map<UUID, OrderProductRequest> productMap = orderProductRequests
                 .stream()
                 .collect(toMap(OrderProductRequest::getProductId, Function.identity()));
-
+        // 두개의 객체를 비교
         for (ProductResponseDto product : productResponses) {
             if (!compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
                 throw new IllegalArgumentException("Not enough product in stock");
@@ -90,6 +91,7 @@ public class OrderService {
 
     }
 
+    //수량이 적으면 안됨 가격이 틀리면 안됨
     private boolean compareOrderProductToClientProduct(OrderProductRequest orderProduct,
                                                        ProductResponseDto clientProduct) {
 
