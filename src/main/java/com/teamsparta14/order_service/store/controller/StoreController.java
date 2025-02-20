@@ -4,6 +4,7 @@ import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.store.dto.*;
 import com.teamsparta14.order_service.store.entity.SortBy;
+import com.teamsparta14.order_service.store.entity.Store;
 import com.teamsparta14.order_service.store.entity.StoreStatus;
 import com.teamsparta14.order_service.store.service.StoreService;
 import com.teamsparta14.order_service.user.dto.CustomUserDetails;
@@ -33,26 +34,26 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    // [GET] 가게 조회
+    // [GET] 전체 가게 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StoreResponseDto>>> getAllStores(
+    public ResponseEntity<ApiResponse<Page<StoreResponseDto>>> getAllStores(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "status", required = false) StoreStatus status,
             @RequestParam(value = "sort", defaultValue = "CREATED_AT") SortBy sortBy
-            ) {
+    ) {
         if (size != 10 && size != 30 && size != 50) {
             size = 10;
         }
 
         Pageable pageable = PageRequest.of(page, size, sortBy.getSort());
-        List<StoreResponseDto> stores = storeService.getAllStores(pageable, status);
+        Page<StoreResponseDto> stores = storeService.getAllStores(pageable, status);
 
         return ResponseEntity.ok(ApiResponse.success(stores));
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
@@ -63,42 +64,48 @@ public class StoreController {
     }
 
     // [PUT] 가게 정보 수정
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @PutMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
-            @RequestBody StoreUpdateRequestDto requestDto
+            @RequestBody StoreUpdateRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        CustomUserDetails userDetails = getAuthenticatedUser();
-        String role = extractRole(userDetails);
+        Store store = storeService.getStoreById(storeId);
+        String currentUsername = customUserDetails.getUsername();
 
-        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
-            throw new AccessDeniedException("가게 수정은 OWNER 또는 ADMIN만 가능합니다.");
+        boolean isAdmin = customUserDetails.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
+
+        if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
+            throw new RuntimeException("본인이 소유한 가게만 수정할 수 있습니다.");
         }
 
         return ResponseEntity.ok(ApiResponse.success(
-                storeService.updateStore(storeId, requestDto, userDetails.getUsername(), role)
+                storeService.updateStore(storeId, requestDto)
         ));
     }
 
     // [DELETE] 가게 삭제
+    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
     @DeleteMapping("/{storeId}")
-
     public ResponseEntity<ApiResponse<Void>> deleteStore(
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-// JWT에서 어케 가져오지
-//        String role = customUserDetails.getUser().getRole().name();
-//
-//        if (!"ADMIN".equals(role)) {
-//            throw new RuntimeException("가게 삭제는 ADMIN만 가능합니다.");
-//        }
-//
-//        storeService.deleteStore(storeId);
+        Store store = storeService.getStoreById(storeId);
+        String currentUsername = customUserDetails.getUsername();
 
+        boolean isAdmin = customUserDetails.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
+
+        if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
+            throw new RuntimeException("본인이 소유한 가게만 삭제할 수 있습니다.");
+        }
         storeService.deleteStore(storeId, customUserDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
 
     // [POST] 카테고리 등록
     @PostMapping("/categories")
@@ -113,12 +120,6 @@ public class StoreController {
         }
         return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto)));
     }
-
-    // [GET] 모든 카테고리 조회 ??
-//    @GetMapping("/categories")
-//    public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
-//        return ResponseEntity.ok(storeService.getAllCategories());
-//    }
 
     // 사용자 정보 가져오기 → 확인 필요
     private CustomUserDetails getAuthenticatedUser() {

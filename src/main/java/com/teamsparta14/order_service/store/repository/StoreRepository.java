@@ -16,13 +16,9 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     Page<Store> findByStatusAndIsDeletedFalse(StoreStatus status, Pageable pageable);
 
-    List<Store> findByIsDeletedFalse();
-
-    List<Store> findByCreatedByAndIsDeletedFalse(String createdBy);
+    Page<Store> findByIsDeletedFalse(Pageable pageable);
 
     Optional<Store> findById(UUID storeId);
-
-    Page<Store> findByIsDeletedFalse(Pageable pageable);
 }
 
 

@@ -1,6 +1,7 @@
 package com.teamsparta14.order_service.store.entity;
 
 import com.teamsparta14.order_service.domain.BaseEntity;
+import com.teamsparta14.order_service.store.dto.StoreUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
@@ -34,11 +35,19 @@ public class Store extends BaseEntity {
     private boolean isDeleted;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StoreStatus status;
 
-    // 삭제 메서드
+    // 삭제
     public void deleteStore(String deletedBy) {
         setDeleted(java.time.LocalDateTime.now(), deletedBy);
         this.isDeleted = true;
+    }
+
+    // 업데이트
+    public void update(StoreUpdateRequestDto requestDto) {
+        this.storeName = requestDto.getStoreName();
+        this.address = requestDto.getAddress();
+        this.phone = requestDto.getPhone();
     }
 }
