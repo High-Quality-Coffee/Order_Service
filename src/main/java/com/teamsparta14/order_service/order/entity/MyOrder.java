@@ -7,7 +7,9 @@ import com.teamsparta14.order_service.payment.entity.Payment;
 import com.teamsparta14.order_service.payment.entity.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UuidGenerator;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -17,15 +19,15 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
+@DynamicUpdate
 @Table(name = "p_order")
-public class Order extends BaseEntity {
+public class MyOrder extends BaseEntity {
 
     @Id
     @UuidGenerator
     @Column(name = "order_id")
-    private UUID order;
+    private UUID orderId;
 
     @Column(name = "user_name", nullable = false)
     private String userName;
@@ -73,8 +75,11 @@ public class Order extends BaseEntity {
 
     public void updateOrderProductList(List<OrderProduct> updateList) {
         this.orderProducts.clear();
-        for (OrderProduct orderProduct : updateList) {
-            this.orderProducts.add(orderProduct);
-        }
+        this.orderProducts.addAll(updateList);
+    }
+
+    public boolean isOwner(String userName){
+
+        return this.userName.equals(userName);
     }
 }

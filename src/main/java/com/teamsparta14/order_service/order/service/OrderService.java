@@ -1,18 +1,17 @@
 package com.teamsparta14.order_service.order.service;
 
 
-import com.teamsparta14.order_service.global.response.ProductClientResponse;
 import com.teamsparta14.order_service.order.dto.OrderCreateDto;
 import com.teamsparta14.order_service.order.dto.OrderProductRequest;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
 import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
-import com.teamsparta14.order_service.order.entity.Order;
+import com.teamsparta14.order_service.order.entity.MyOrder;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
 import com.teamsparta14.order_service.order.repository.ProductClient;
-import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
+import com.teamsparta14.order_service.order.repository.StoresClient;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
-import com.teamsparta14.order_service.product.entity.Product;
+import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,25 +20,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-//
-//    private final StoresClient storesClient;
+
     private final ProductClient productClient;
     private final OrderRepository orderRepository;
+    private final StoresClient storesClient;
+    private final JWTUtil jwtUtil;
 
 
-    public OrderResponse createOrder(OrderCreateDto createDto , String userName,String token) {
+    public OrderResponse createOrder(OrderCreateDto createDto ,String token) {
+
+        String userName = jwtUtil.getUsername(token);
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
+        Object store = storesClient.searchStore(createDto.getStoreId(),token);
+
+        if(null == store){
+            throw new IllegalArgumentException("store Not found");
+        }
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
@@ -47,9 +53,8 @@ public class OrderService {
 
         requestCompareToProductList(orderProductRequests , productClientResponse);
 
-        Order order = createDto.from(userName);
+        MyOrder order = createDto.from(userName);
          for (OrderProductRequest orderProductRequest : orderProductRequests) {
-
 
              order.addOrderProductsList(OrderProduct.builder()
                              .order(order)
@@ -66,7 +71,6 @@ public class OrderService {
 
     private void requestCompareToProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> clienList) {
 
-        //client를 통해 얻은 데이터를 Map으로
         Map<UUID, Long> productMap = clienList.stream()
                 .collect(Collectors.toMap(ProductResponseDto::getProductId,ProductResponseDto::getProductQuantity));
 
@@ -88,63 +92,70 @@ public class OrderService {
 
 
     @Transactional
-    public OrderResponse deleteOrder(UUID orderId,String userName) {
+    public OrderResponse deleteOrder(UUID orderId,String token) {
 
+        String userName = jwtUtil.getUsername(token);
 
-        Order order = orderRepository.findById(orderId).orElseThrow(
+        MyOrder order = orderRepository.findByOrderIdAndDeletedAtIsNull(orderId).orElseThrow(
                 ()-> new IllegalArgumentException("Order Not Found")
         );
 
-        // 유저 인증 추가 구현 필요
-        if(!order.getUserName().equals(userName)){
+        if( !order.isOwner(userName) ){
             throw new IllegalArgumentException("Not Own Order");
         }
 
-        orderRepository.delete(order);
+        LocalDateTime orderTime = order.getCreatedAt();
+
+        Duration duration = Duration.between(orderTime, LocalDateTime.now());
+
+        if(duration.toMinutes() > 5){
+            throw new IllegalArgumentException("The order cancellation time has expired.");
+        }
+
+        order.setDeleted(LocalDateTime.now(),userName);
 
         return OrderResponse.from(order);
     }
 
-    public OrderResponse getOrderById(UUID orderId,String userName) {
-        ;
+    public OrderResponse getOrderById(UUID orderId,String token) {
 
-        Order order = orderRepository.findById(orderId).orElseThrow(
+        String userName = jwtUtil.getUsername(token);
+
+        MyOrder order = orderRepository.findOrderWithProductsWithPayment(orderId).orElseThrow(
                 ()-> new IllegalArgumentException("Order Not Found")
         );
 
-        // 유저 인증 추가 구현 필요
-        if(!order.getUserName().equals(userName)){
+        if( !order.isOwner(userName) ){
             throw new IllegalArgumentException("Not Own Order");
         }
-
-        // 유저 인증 추가 구현 필요
 
         return OrderResponse.from(order);
     }
 
-    public List<OrderResponse> searchOrders(String userName, int page, int limit,
+    public List<OrderResponse> searchOrders(String token, int page, int limit,
                                           Boolean isAsc, String orderBy) {
-        Sort.Direction direction;
-        if(isAsc){
-            direction = Sort.Direction.ASC;
-        }else {
-            direction = Sort.Direction.DESC;
-        }
+
+        String userName = jwtUtil.getUsername(token);
+
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+
         Pageable pageable = PageRequest.of(page-1, limit, Sort.by(direction, orderBy));
 
-        Page<OrderResponse> orderPage = orderRepository.searchByUserId(userName,pageable).map(OrderResponse::from);
+        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName,pageable).map(OrderResponse::from);
 
         return orderPage.toList();
     }
 
     @Transactional
-    public OrderResponse updateOrder(OrderUpdateRequest orderUpdateRequest, String userName) {
+    public OrderResponse updateOrder(OrderUpdateRequest orderUpdateRequest, String token) {
 
-        Order order = orderRepository.findById(orderUpdateRequest.getOrderId()).orElseThrow(
+        String userName = jwtUtil.getUsername(token);
+
+        MyOrder order = orderRepository.findById(orderUpdateRequest.getOrderId()).orElseThrow(
                 ()-> new IllegalArgumentException("Order Not Found")
         );
 
-        if(!order.getUserName().equals(userName)){
+        if( !order.isOwner(userName) ){
             throw new IllegalArgumentException("Not Own Order");
         }
 

@@ -1,7 +1,7 @@
 package com.teamsparta14.order_service.order.dto;
 
 
-import com.teamsparta14.order_service.order.entity.Order;
+import com.teamsparta14.order_service.order.entity.MyOrder;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -22,8 +22,8 @@ public class OrderCreateDto {
     private OrderType orderType;
     private String orderComment;
 
-    public Order from(String userName){
-        return Order.builder()
+    public MyOrder from(String userName){
+        return MyOrder.builder()
                 .userName(userName)
                 .storeId(storeId)
                 .orderComment(orderComment)
