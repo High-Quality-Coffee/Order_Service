@@ -63,7 +63,6 @@ public class StoreService {
                 .address(dto.getAddress())
                 .phone(dto.getPhone())
                 .isDeleted(false)
-                .createdBy(createdBy)
                 .status(dto.getStatus() != null ? dto.getStatus() : StoreStatus.OPEN)
                 .build();
 
