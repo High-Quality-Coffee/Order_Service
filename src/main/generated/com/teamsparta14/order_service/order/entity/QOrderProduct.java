@@ -22,7 +22,7 @@ public class QOrderProduct extends EntityPathBase<OrderProduct> {
 
     public static final QOrderProduct orderProduct = new QOrderProduct("orderProduct");
 
-    public final QOrder order;
+    public final QMyOrder order;
 
     public final ComparablePath<java.util.UUID> order_product_id = createComparable("order_product_id", java.util.UUID.class);
 
@@ -50,7 +50,7 @@ public class QOrderProduct extends EntityPathBase<OrderProduct> {
 
     public QOrderProduct(Class<? extends OrderProduct> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.order = inits.isInitialized("order") ? new QOrder(forProperty("order"), inits.get("order")) : null;
+        this.order = inits.isInitialized("order") ? new QMyOrder(forProperty("order"), inits.get("order")) : null;
     }
 
 }

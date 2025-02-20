@@ -22,7 +22,7 @@ public class PaymentService {
                 () -> new IllegalArgumentException("Not found Payment")
         );
 
-        if (userName.equals(payment.getUserName())){
+        if (!userName.equals(payment.getUserName())){
             throw new IllegalArgumentException("Not Own Payment");
         }
 
@@ -36,7 +36,7 @@ public class PaymentService {
                 () -> new IllegalArgumentException("Not found Payment")
         );
 
-        if (userName.equals(payment.getUserName())){
+        if (!userName.equals(payment.getUserName())){
             throw new IllegalArgumentException("Not Own Payment");
         }
 

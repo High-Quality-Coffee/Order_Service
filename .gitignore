@@ -8,6 +8,7 @@ build/
 *.yml
 src/main/resources/properties/env.properties
 src/main/generated
+Dockerfile
 
 ### STS ###
 .apt_generated

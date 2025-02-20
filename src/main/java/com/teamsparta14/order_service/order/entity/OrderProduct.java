@@ -3,8 +3,6 @@ package com.teamsparta14.order_service.order.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
@@ -17,8 +15,6 @@ import java.util.UUID;
 @Table(name = "p_order_product")
 public class OrderProduct {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "order_product_id")
@@ -26,7 +22,7 @@ public class OrderProduct {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    private Order order;
+    private MyOrder order;
 
     @Column(name = "product_id")
     private UUID productId;
