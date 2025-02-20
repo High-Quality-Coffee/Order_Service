@@ -3,6 +3,7 @@ package com.teamsparta14.order_service.user.entity;
 import com.teamsparta14.order_service.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;

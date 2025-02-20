@@ -51,9 +51,8 @@ public class UserService {
         //비밀번호 암호화
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
-        UserEntity userEntity = new UserEntity();
+        UserEntity userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
         userEntity.setRole(Role.ROLE_MASTER);
-        userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
         userRepository.save(userEntity);
     }
 
