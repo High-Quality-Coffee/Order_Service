@@ -33,6 +33,9 @@ public class Store extends BaseEntity {
     private String createdBy;
     private boolean isDeleted;
 
+    @Enumerated(EnumType.STRING)
+    private StoreStatus status;
+
     // 삭제 메서드
     public void deleteStore(String deletedBy) {
         setDeleted(java.time.LocalDateTime.now(), deletedBy);
