@@ -53,7 +53,7 @@ public class StoreController {
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
@@ -110,17 +110,11 @@ public class StoreController {
 
 
     // [POST] 카테고리 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
     @PostMapping("/categories")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
             @RequestBody CategoryRequestDto requestDto
     ) {
-        CustomUserDetails userDetails = getAuthenticatedUser();
-        String role = extractRole(userDetails);
-
-        if (!"ADMIN".equals(role)) {
-            throw new RuntimeException("카테고리 등록은 관리자만 가능합니다.");
-        }
         return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto)));
     }
 

@@ -64,6 +64,7 @@ public class StoreService {
                 .phone(dto.getPhone())
                 .isDeleted(false)
                 .createdBy(createdBy)
+                .status(dto.getStatus() != null ? dto.getStatus() : StoreStatus.OPEN)
                 .build();
 
         Store savedStore = storeRepository.save(store);
