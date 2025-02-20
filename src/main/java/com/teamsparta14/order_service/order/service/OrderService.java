@@ -77,7 +77,7 @@ public class OrderService {
         Map<UUID,OrderProductRequest> productMap = createOrderProductMap(orderProductRequests);
 
         for (ProductResponseDto product : productClientResponse) {
-            if (compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
+            if (!compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
                 throw new IllegalArgumentException("Not enough product in stock");
             }
             productMap.remove(product.getProductId());
@@ -93,7 +93,7 @@ public class OrderService {
 
         if(orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
 
-        if(orderProduct.getPrice() > clientProduct.getProductPrice()) return false;
+        if(orderProduct.getPrice().equals(clientProduct.getProductPrice())) return false;
 
         return true;
     }
