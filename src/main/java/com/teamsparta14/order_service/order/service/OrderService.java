@@ -49,9 +49,11 @@ public class OrderService {
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
-        List<ProductResponseDto> productClientResponse= productClient.searchProductList(orderProductRequests,token);
+        List<ProductResponseDto> productClientResponse = productClient.searchProductList(orderProductRequests, token);
 
-        requestCompareToProductList(orderProductRequests , productClientResponse);
+
+        requestCompareToClientProductList(orderProductRequests,productClientResponse);
+
 
         MyOrder order = createDto.from(userName);
          for (OrderProductRequest orderProductRequest : orderProductRequests) {
@@ -69,26 +71,45 @@ public class OrderService {
          return OrderResponse.from(orderRepository.save(order));
     }
 
-    private void requestCompareToProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> clienList) {
+    private void requestCompareToClientProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> productClientResponse) {
 
-        Map<UUID, Long> productMap = clienList.stream()
-                .collect(Collectors.toMap(ProductResponseDto::getProductId,ProductResponseDto::getProductQuantity));
 
-        for (OrderProductRequest orderProductRequest : orderProductRequests) {
-            Long productQuantity = productMap.get(orderProductRequest.getProductId());
+        Map<UUID,OrderProductRequest> productMap = createOrderProductMap(orderProductRequests);
 
-            if (productQuantity < orderProductRequest.getQuantity()) {
+        for (ProductResponseDto product : productClientResponse) {
+            if (compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
                 throw new IllegalArgumentException("Not enough product in stock");
             }
-            productMap.remove(orderProductRequest.getProductId());
+            productMap.remove(product.getProductId());
         }
 
-        if(!productMap.isEmpty()){
+        if (!productMap.isEmpty()) {
             throw new IllegalArgumentException("product not found");
         }
 
     }
 
+    private boolean compareOrderProductToClientProduct(OrderProductRequest orderProduct, ProductResponseDto clientProduct) {
+
+        if(orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
+
+        if(orderProduct.getPrice() > clientProduct.getProductPrice()) return false;
+
+        return true;
+    }
+
+
+
+    private Map<UUID,OrderProductRequest> createOrderProductMap(List<OrderProductRequest> orderProductRequests){
+
+        Map<UUID,OrderProductRequest> list = new HashMap<>();
+
+        orderProductRequests.forEach(product -> {
+            list.put(product.getProductId(),product);
+        });
+
+       return list;
+    }
 
 
     @Transactional
