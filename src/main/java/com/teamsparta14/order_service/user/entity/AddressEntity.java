@@ -3,13 +3,16 @@ package com.teamsparta14.order_service.user.entity;
 import com.teamsparta14.order_service.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
 @Entity
-@Data
+@Setter
+@Getter
 @Table(name = "p_address")
 public class AddressEntity extends BaseEntity {
     @Id
