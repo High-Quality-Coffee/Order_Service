@@ -1,7 +1,5 @@
 package com.teamsparta14.order_service.product.service;
 
-import com.teamsparta14.order_service.order.dto.OrderProductRequest;
-import com.teamsparta14.order_service.product.dto.ProductListResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
 import com.teamsparta14.order_service.product.dto.ProductSearchDto;
