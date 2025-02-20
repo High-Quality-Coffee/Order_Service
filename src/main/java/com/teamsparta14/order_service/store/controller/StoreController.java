@@ -1,16 +1,22 @@
 package com.teamsparta14.order_service.store.controller;
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
+import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.store.dto.*;
+import com.teamsparta14.order_service.store.entity.SortBy;
+import com.teamsparta14.order_service.store.entity.StoreStatus;
 import com.teamsparta14.order_service.store.service.StoreService;
 import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Request;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,29 +33,33 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    // [GET] 모든 가게 조회(페이징)
+    // [GET] 가게 조회
     @GetMapping
     public ResponseEntity<ApiResponse<List<StoreResponseDto>>> getAllStores(
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(ApiResponse.success(storeService.getAllStores(pageable)));
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "status", required = false) StoreStatus status,
+            @RequestParam(value = "sort", defaultValue = "CREATED_AT") SortBy sortBy
+            ) {
+        if (size != 10 && size != 30 && size != 50) {
+            size = 10;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortBy.getSort());
+        List<StoreResponseDto> stores = storeService.getAllStores(pageable, status);
+
+        return ResponseEntity.ok(ApiResponse.success(stores));
     }
 
     // [POST] 가게 등록
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
-            @RequestBody StoreRequestDto dto
+            @RequestBody StoreRequestDto dto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        CustomUserDetails userDetails = getAuthenticatedUser();
-        String role = extractRole(userDetails);
-
-        if (!"OWNER".equals(role)) {
-            throw new RuntimeException("가게 등록은 OWNER만 가능합니다.");
-        }
-
-        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, userDetails.getUsername())));
+        String createdBy = customUserDetails.getUsername();
+        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, createdBy)));
     }
 
     // [PUT] 가게 정보 수정
@@ -60,6 +70,10 @@ public class StoreController {
     ) {
         CustomUserDetails userDetails = getAuthenticatedUser();
         String role = extractRole(userDetails);
+
+        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+            throw new AccessDeniedException("가게 수정은 OWNER 또는 ADMIN만 가능합니다.");
+        }
 
         return ResponseEntity.ok(ApiResponse.success(
                 storeService.updateStore(storeId, requestDto, userDetails.getUsername(), role)
@@ -73,6 +87,14 @@ public class StoreController {
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
+// JWT에서 어케 가져오지
+//        String role = customUserDetails.getUser().getRole().name();
+//
+//        if (!"ADMIN".equals(role)) {
+//            throw new RuntimeException("가게 삭제는 ADMIN만 가능합니다.");
+//        }
+//
+//        storeService.deleteStore(storeId);
 
         storeService.deleteStore(storeId, customUserDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success(null));

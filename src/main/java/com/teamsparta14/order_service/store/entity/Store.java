@@ -30,6 +30,7 @@ public class Store extends BaseEntity {
     @Column(nullable = false, length = 15)
     private String phone;
 
+    private String createdBy;
     private boolean isDeleted;
 
     // 삭제 메서드

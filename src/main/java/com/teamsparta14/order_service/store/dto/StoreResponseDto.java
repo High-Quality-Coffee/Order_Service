@@ -14,6 +14,7 @@ public class StoreResponseDto {
     private String address;
     private String phone;
     private List<String> categories;
+    private String createdBy;
 
     // 기본 생성자
     public StoreResponseDto(Store store, List<String> categories) {
@@ -21,6 +22,7 @@ public class StoreResponseDto {
         this.storeName = store.getStoreName();
         this.address = store.getAddress();
         this.phone = store.getPhone();
+        this.createdBy = store.getCreatedBy();
         this.categories = categories != null ? categories : Collections.emptyList(); //빈값이 아니면 카테고리
     }
 }

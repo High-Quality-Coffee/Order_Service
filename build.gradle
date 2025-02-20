@@ -1,4 +1,3 @@
-// querydsl
 buildscript {
 	ext {
 		queryDslVersion = "5.0.0"
@@ -31,16 +30,42 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	//implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.postgresql:postgresql:42.7.3'
+	// Spring Boot 기본 의존성
+	implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation "org.postgresql:postgresql:42.7.3"
 
-	// querydsl for spring boot 3.x
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+	// Lombok
+	compileOnly "org.projectlombok:lombok"
+	annotationProcessor "org.projectlombok:lombok"
+
+	// Spring Validation
+	implementation "org.springframework.boot:spring-boot-starter-validation"
+
+	implementation('org.modelmapper:modelmapper:2.4.4')
+
+	// Test 관련 의존성
+	testImplementation "org.springframework.boot:spring-boot-starter-test"
+	testImplementation "org.springframework.security:spring-security-test"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+	// 환경 변수 파일(.env) 읽기 위한 라이브러리
+	implementation "io.github.cdimascio:java-dotenv:5.2.2"
+
+	// QueryDSL 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	//swagger 추가
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+}
 
 tasks.withType(JavaCompile) {
 	options.compilerArgs = ['-Xlint:unchecked']
@@ -52,24 +77,21 @@ tasks.withType(JavaCompile) {
 	//annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 }
 
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
 // Querydsl 설정부
 def generated = 'src/main/generated'
-
 // querydsl QClass 파일 생성 위치를 지정
 tasks.withType(JavaCompile) {
 	options.getGeneratedSourceOutputDirectory().set(file(generated))
 }
-
 // java source set 에 querydsl QClass 위치 추가
 sourceSets {
 	main.java.srcDirs += [ generated ]
 }
-
 // gradle clean 시에 QClass 디렉토리 삭제
 clean {
 	delete file(generated)
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
 }

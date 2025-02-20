@@ -5,6 +5,7 @@ import com.teamsparta14.order_service.store.dto.*;
 import com.teamsparta14.order_service.store.entity.Category;
 import com.teamsparta14.order_service.store.entity.Store;
 import com.teamsparta14.order_service.store.entity.StoreCategory;
+import com.teamsparta14.order_service.store.entity.StoreStatus;
 import com.teamsparta14.order_service.store.repository.StoreCategoryRepository;
 import com.teamsparta14.order_service.store.repository.CategoryRepository;
 import com.teamsparta14.order_service.store.repository.StoreRepository;
@@ -13,6 +14,7 @@ import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import com.teamsparta14.order_service.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +31,23 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
 
-    // [조회] 가게 ID 기반 카테고리 이름 리스트
+    // 가게 조회
+    public List<StoreResponseDto> getAllStores(Pageable pageable, StoreStatus status) {
+        Page<Store> stores;
+
+        if (status != null) {
+            stores = storeRepository.findByStatusAndIsDeletedFalse(status, pageable);
+        } else {
+            stores = storeRepository.findByIsDeletedFalse(pageable);
+        }
+
+        return stores.getContent()
+                .stream()
+                .map(store -> new StoreResponseDto(store, getCategoryNames(store.getId())))
+                .collect(Collectors.toList());
+    }
+
+    // 카테고리 조회
     private List<String> getCategoryNames(UUID storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
@@ -41,38 +59,16 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // [조회] 삭제되지 않은 가게만
-    public List<StoreResponseDto> getAllStores(Pageable pageable) {
-        return storeRepository.findByIsDeletedFalse()
-                .stream()
-                .map(store -> new StoreResponseDto(store, getCategoryNames(store.getId())))
-                .collect(Collectors.toList());
-    }
-
     // [등록] 가게 (owner만)
     @Transactional
     public StoreResponseDto createStore(StoreRequestDto dto, String createdBy) {
-
-//        // 1. HTTP 요청에서 JWT 토큰 가져오기
-//        String token = extractToken(request);
-//        if (token == null) {
-//            throw new RuntimeException("JWT 토큰이 필요합니다.");
-//        }
-//
-//        // 2. 현재 로그인한 사용자의 역할(Role) 확인
-//        String role = jwtUtil.getRole(token);
-//        if (!Role.OWNER.name().equals(role)) {
-//            throw new RuntimeException("가게를 등록할 권한이 없습니다.");
-//        }
-//
-//        // 3. 현재 로그인한 사용자의 username 가져오기
-//        String username = jwtUtil.getUsername(token);
 
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
                 .address(dto.getAddress())
                 .phone(dto.getPhone())
                 .isDeleted(false)
+                .createdBy(createdBy)
                 .build();
 
         Store savedStore = storeRepository.save(store);
@@ -144,4 +140,8 @@ public class StoreService {
                 .collect(Collectors.toList());
         storeCategoryRepository.saveAll(storeCategories);
     }
+
+//    public Page<StoreResponseDto> getStoresWithSorting(Pageable pageable, String sortBy, boolean ascending) {
+//        return storeRepository.getStoresWithSorting(pageable, sortBy, ascending);
+//    }
 }
