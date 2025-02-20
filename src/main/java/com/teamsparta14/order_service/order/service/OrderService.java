@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    //
+//
 //    private final StoresClient storesClient;
     private final ProductClient productClient;
     private final OrderRepository orderRepository;
@@ -48,20 +48,20 @@ public class OrderService {
         requestCompareToProductList(orderProductRequests , productClientResponse);
 
         Order order = createDto.from(userName);
-        for (OrderProductRequest orderProductRequest : orderProductRequests) {
+         for (OrderProductRequest orderProductRequest : orderProductRequests) {
 
 
-            order.addOrderProductsList(OrderProduct.builder()
-                    .order(order)
-                    .productId(orderProductRequest.getProductId())
-                    .quantity(orderProductRequest.getQuantity())
-                    .price(orderProductRequest.getPrice())
-                    .build());
-        }
+             order.addOrderProductsList(OrderProduct.builder()
+                             .order(order)
+                             .productId(orderProductRequest.getProductId())
+                             .quantity(orderProductRequest.getQuantity())
+                             .price(orderProductRequest.getPrice())
+                     .build());
+         }
 
-        order.createPayment();
+         order.createPayment();
 
-        return OrderResponse.from(orderRepository.save(order));
+         return OrderResponse.from(orderRepository.save(order));
     }
 
     private void requestCompareToProductList(List<OrderProductRequest> orderProductRequests, List<ProductResponseDto> clienList) {

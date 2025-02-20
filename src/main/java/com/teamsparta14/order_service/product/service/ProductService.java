@@ -2,9 +2,12 @@ package com.teamsparta14.order_service.product.service;
 
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
+import com.teamsparta14.order_service.product.dto.ProductSearchDto;
+import com.teamsparta14.order_service.product.entity.Description;
 import com.teamsparta14.order_service.product.entity.Product;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
+import com.teamsparta14.order_service.product.repository.DescriptionRepository;
 import com.teamsparta14.order_service.product.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final DescriptionRepository descriptionRepository;
 
     //상품 전체 조회
     public List<ProductResponseDto> getProducts(UUID storeId, Pageable pageable, SortBy sortBy, ProductStatus status) {
@@ -50,9 +54,18 @@ public class ProductService {
 
         AIDescription aiDescription = new AIDescription();
 
-        String description = aiDescription.getDescription(requestDto.getProductName());
+        String aiRequest = requestDto.getProductName() + "란 음식을 50자 이내로 설명해줘";
 
-        Product product = productRepository.save(new Product(requestDto,storeId,description));
+        String aiResponse = aiDescription.getDescription(aiRequest);
+
+        Description description =  Description.builder()
+                .request(aiRequest)
+                .response(aiResponse)
+                .build();
+
+        descriptionRepository.save(description);
+
+        Product product = productRepository.save(new Product(requestDto,storeId,aiResponse));
 
         return ProductResponseDto.of(product);
     }
@@ -105,13 +118,25 @@ public class ProductService {
 
         return ProductResponseDto.of(product);
     }
-    
+
     //상품 검색
     public List<ProductResponseDto> searchByTitle(UUID storeId, String keyword, Pageable pageable, SortBy sortBy, ProductStatus status) {
 
         if(keyword == null) keyword = "";
 
         List<Product> productList = productRepository.findByTitleContain(storeId, keyword,pageable, sortBy, status);
+        List<ProductResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Product product : productList) {
+            responseDtoList.add(ProductResponseDto.of(product));
+        }
+
+        return responseDtoList;
+    }
+
+    public  List<ProductResponseDto> searchProduct(ProductSearchDto requestDto) {
+
+        List<Product> productList = productRepository.searchProductByIdList(requestDto);
         List<ProductResponseDto> responseDtoList = new ArrayList<>();
 
         for (Product product : productList) {
