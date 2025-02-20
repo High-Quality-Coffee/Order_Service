@@ -48,7 +48,6 @@ public class StoreService {
         return stores.map(store -> new StoreResponseDto(store, getCategoryNames(store.getId())));
     }
 
-
     // [조회] 특정 가게
     public Store getStoreById(UUID storeId) {
         return storeRepository.findById(storeId)
@@ -87,30 +86,18 @@ public class StoreService {
 
     // [삭제] 가게
     @Transactional
-    public void deleteStore(UUID storeId, String deletedBy) {
+    public String deleteStore(UUID storeId, String deletedBy) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
-            throw new RuntimeException("인증된 사용자가 없습니다.");
-        }
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String currentUsername = userDetails.getUsername();
-
-        boolean isAdmin = userDetails.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
-
-        if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
-            throw new RuntimeException("본인이 소유한 가게만 삭제할 수 있습니다.");
-        }
-
         store.setDeleted(true);
+        store.setDeletedBy(deletedBy);
         storeRepository.save(store);
+
+        return "가게 ID " + storeId + "가 성공적으로 삭제되었습니다.";
     }
 
-    // 카테고리 조회 ??
+    // [조회] 카테고리
     private List<String> getCategoryNames(UUID storeId) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
@@ -122,7 +109,7 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // [카테고리 저장]
+    // [등록] 카테고리 저장
     private void saveStoreCategories(Store store, List<String> categoryNames) {
         List<Category> categories = categoryRepository.findByCategoryNameIn(categoryNames);
         List<StoreCategory> storeCategories = categories.stream()
@@ -131,7 +118,7 @@ public class StoreService {
         storeCategoryRepository.saveAll(storeCategories);
     }
 
-    // [등록] 카테고리 (관리자만) ??
+    // [등록] 카테고리
     @Transactional
     public CategoryResponseDto createCategory(CategoryRequestDto dto) {
 

@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/stores")
 @RequiredArgsConstructor
+@RequestMapping("/api/stores")
 public class StoreController {
 
     private final StoreService storeService;
@@ -53,7 +53,7 @@ public class StoreController {
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
@@ -64,7 +64,7 @@ public class StoreController {
     }
 
     // [PUT] 가게 정보 수정
-    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
     @PutMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
@@ -87,27 +87,30 @@ public class StoreController {
     }
 
     // [DELETE] 가게 삭제
-    @PreAuthorize("hasAnyAuthority('OWNER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
     @DeleteMapping("/{storeId}")
-    public ResponseEntity<ApiResponse<Void>> deleteStore(
+    public ResponseEntity<ApiResponse<String>> deleteStore(
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        Store store = storeService.getStoreById(storeId);
         String currentUsername = customUserDetails.getUsername();
 
         boolean isAdmin = customUserDetails.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        Store store = storeService.getStoreById(storeId);
 
         if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
             throw new RuntimeException("본인이 소유한 가게만 삭제할 수 있습니다.");
         }
-        storeService.deleteStore(storeId, customUserDetails.getUsername());
-        return ResponseEntity.ok(ApiResponse.success(null));
+
+        String deleteMessage = storeService.deleteStore(storeId, currentUsername);
+        return ResponseEntity.ok(ApiResponse.success(deleteMessage));
     }
 
 
     // [POST] 카테고리 등록
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping("/categories")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
             @RequestBody CategoryRequestDto requestDto
