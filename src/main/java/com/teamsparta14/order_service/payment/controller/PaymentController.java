@@ -2,6 +2,7 @@ package com.teamsparta14.order_service.payment.controller;
 
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
+import com.teamsparta14.order_service.payment.dto.PaymentResponse;
 import com.teamsparta14.order_service.payment.dto.PaymentUpdateDto;
 import com.teamsparta14.order_service.payment.entity.Payment;
 import com.teamsparta14.order_service.payment.service.PaymentService;
@@ -21,7 +22,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Payment>> updatePayment(
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePayment(
             @RequestBody PaymentUpdateDto paymentUpdateDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
             ){
@@ -32,7 +33,7 @@ public class PaymentController {
     }
 
     @GetMapping("/{payment_id}")
-    public ResponseEntity<ApiResponse<Payment>> getPayment(
+    public ResponseEntity<ApiResponse<PaymentResponse>> getPayment(
             @PathVariable(name = "payment_id") UUID paymentId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){

@@ -46,10 +46,11 @@ public class OrderService {
         String userName = jwtUtil.getUsername(token);
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
-        Optional.ofNullable(storesClient.searchStore(createDto.getStoreId(), token))
-                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
+//        Optional.ofNullable(storesClient.searchStore(createDto.getStoreId(), token))
+//                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
+
         List<UUID> productIds = orderProductRequests.stream().map(OrderProductRequest::getProductId).toList();
 
         List<ProductResponseDto> productResponses = productClient.searchProductList(productIds, token);
@@ -97,7 +98,7 @@ public class OrderService {
 
         if (orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
 
-        return !orderProduct.getPrice().equals(clientProduct.getProductPrice());
+        return orderProduct.getPrice().equals(clientProduct.getProductPrice());
     }
 
     @Transactional
@@ -105,7 +106,7 @@ public class OrderService {
 
         String userName = jwtUtil.getUsername(token);
 
-        MyOrder order = orderRepository.findByOrderIdAndDeletedAtIsNull(orderId).orElseThrow(
+        MyOrder order = orderRepository.findByOrderIdAndIsDeletedFalse(orderId).orElseThrow(
                 () -> new IllegalArgumentException("Order Not Found")
         );
 
@@ -121,7 +122,7 @@ public class OrderService {
             throw new IllegalArgumentException("The order cancellation time has expired.");
         }
 
-        order.setDeleted(LocalDateTime.now(), userName);
+        order.setIsDeleted(true);
 
         return OrderResponse.from(order);
     }
@@ -141,7 +142,7 @@ public class OrderService {
         return OrderResponse.from(order);
     }
 
-    public List<OrderResponse> searchOrders(String token, int page, int limit,
+    public Page<OrderResponse> searchOrders(String token, int page, int limit,
                                             Boolean isAsc, String orderBy) {
 
         String userName = jwtUtil.getUsername(token);
@@ -150,9 +151,7 @@ public class OrderService {
 
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, orderBy));
 
-        Page<OrderResponse> orderPage = orderRepository.searchByUserName(userName, pageable).map(OrderResponse::from);
-
-        return orderPage.toList();
+        return orderRepository.searchByUserName(userName, pageable).map(OrderResponse::from);
     }
 
     @Transactional
@@ -182,5 +181,17 @@ public class OrderService {
         order.updateOrderProductList(updateList);
 
         return OrderResponse.from(order);
+    }
+
+    public Page<OrderResponse> searchOrdersByStoreId(String storeId ,String token, int page, int limit, Boolean isAsc, String orderBy) {
+
+        String userName = jwtUtil.getUsername(token);
+
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(direction, orderBy));
+
+        return orderRepository.searchByStoreId(userName, pageable,storeId).map(OrderResponse::from);
+
     }
 }

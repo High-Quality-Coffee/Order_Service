@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import java.util.List;
+import java.util.UUID;
 
 import static com.teamsparta14.order_service.order.entity.QMyOrder.myOrder;
 import static com.teamsparta14.order_service.order.entity.QOrderProduct.orderProduct;
@@ -32,7 +33,6 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 
         List<MyOrder> query = jpaQueryFactory
                 .selectFrom(myOrder)
-                .distinct()
                 .where(
                         myOrder.userName.eq(userName),
                         myOrder.deletedAt.isNull()
@@ -45,6 +45,33 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
         JPQLQuery<MyOrder> count = jpaQueryFactory
                 .selectFrom(myOrder)
                 .from(myOrder);
+
+
+
+
+        return PageableExecutionUtils.getPage(query, pageable, count::fetchCount);
+    }
+
+    @Override
+    public Page<MyOrder> searchByStoreId(String userName, Pageable pageable, String storeId) {
+        OrderSpecifier<?>[] orderSpecifiers = buildOrderSpecifiers(pageable);
+
+        List<MyOrder> query = jpaQueryFactory
+                .selectFrom(myOrder)
+                .where(
+                        myOrder.storeId.eq(UUID.fromString(storeId)),
+                        myOrder.deletedAt.isNull()
+                )
+                .orderBy(orderSpecifiers)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPQLQuery<MyOrder> count = jpaQueryFactory
+                .selectFrom(myOrder)
+                .from(myOrder);
+
+
 
 
         return PageableExecutionUtils.getPage(query, pageable, count::fetchCount);
