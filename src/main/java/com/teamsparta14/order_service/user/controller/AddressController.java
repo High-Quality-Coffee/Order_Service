@@ -25,28 +25,28 @@ public class AddressController {
 
     //주소 입력
     @PostMapping("/api/address")
-    public void create_address(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody @Valid AddressRequestDTO addressRequestDTO){
-        addressService.save_address(customUserDetails,addressRequestDTO);
+    public void create_address(@RequestHeader(name = "access") String token, @RequestBody @Valid AddressRequestDTO addressRequestDTO){
+        addressService.save_address(token,addressRequestDTO);
     }
 
     //주소 읽기
     @GetMapping("/api/address")
-    public ResponseEntity<ApiResponse<List<AddressResponseDTO>>> read_address(@AuthenticationPrincipal CustomUserDetails customUserDetails){
-        ApiResponse<List<AddressResponseDTO>> addressResponseDTOS = addressService.read_address(customUserDetails);
+    public ResponseEntity<ApiResponse<List<AddressResponseDTO>>> read_address(@RequestHeader(name = "access") String token){
+        ApiResponse<List<AddressResponseDTO>> addressResponseDTOS = addressService.read_address(token);
         return ResponseEntity.ok().body(addressResponseDTOS);
     }
 
     //주소 수정
     @PutMapping("/api/address/{address_id}")
-    public ResponseEntity<ApiResponse<String>> update_address(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody @Valid AddressRequestDTO addressRequestDTO, @PathVariable("address_id") UUID address_id){
-        ApiResponse<String> apiResponse = addressService.update_address(customUserDetails,addressRequestDTO,address_id);
+    public ResponseEntity<ApiResponse<String>> update_address(@RequestHeader(name = "access") String token, @RequestBody @Valid AddressRequestDTO addressRequestDTO, @PathVariable("address_id") UUID address_id){
+        ApiResponse<String> apiResponse = addressService.update_address(token,addressRequestDTO,address_id);
         return ResponseEntity.ok().body(apiResponse);
     }
 
     //주소 삭제
     @DeleteMapping("/api/address/{address_id}")
-    public ResponseEntity<ApiResponse<String>> delete_address(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable("address_id") UUID address_id){
-        ApiResponse<String> apiResponse = addressService.delete_address(customUserDetails, address_id);
+    public ResponseEntity<ApiResponse<String>> delete_address(@RequestHeader(name = "access") String token, @PathVariable("address_id") UUID address_id){
+        ApiResponse<String> apiResponse = addressService.delete_address(token, address_id);
         return ResponseEntity.ok().body(apiResponse);
     }
 

@@ -7,6 +7,7 @@ import com.teamsparta14.order_service.user.dto.AddressRequestDTO;
 import com.teamsparta14.order_service.user.dto.AddressResponseDTO;
 import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.entity.AddressEntity;
+import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import com.teamsparta14.order_service.user.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -20,12 +21,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class AddressService {
+
+    private final JWTUtil jwtUtil;
     private final AddressRepository addressRepository;
 
     //배송지 정보 저장
-    public void save_address(CustomUserDetails customUserDetails, AddressRequestDTO addressRequestDTO){
+    public void save_address(String token, AddressRequestDTO addressRequestDTO){
         ModelMapper modelMapper = new ModelMapper();
-        String username = customUserDetails.getUsername();
+        String username = jwtUtil.getUsername(token);
 
         AddressEntity addressEntity = modelMapper.map(addressRequestDTO, AddressEntity.class);
         addressEntity.setUsername(username);
@@ -34,11 +37,11 @@ public class AddressService {
     }
 
     //배송지 정보 조회
-    public ApiResponse<List<AddressResponseDTO>> read_address(CustomUserDetails customUserDetails){
+    public ApiResponse<List<AddressResponseDTO>> read_address(String token){
         ModelMapper modelMapper = new ModelMapper();
         List<AddressResponseDTO> addressResponseDTOS = new ArrayList<>();
 
-        String username = customUserDetails.getUsername();
+        String username = jwtUtil.getUsername(token);
 
         List<AddressEntity> addressEntities = addressRepository.findAllByUsername(username);
 
@@ -52,8 +55,8 @@ public class AddressService {
 
     //배송지 정보 수정
     @Transactional
-    public ApiResponse<String> update_address(CustomUserDetails customUserDetails, AddressRequestDTO addressRequestDTO,UUID address_id){
-        String username = customUserDetails.getUsername();
+    public ApiResponse<String> update_address(String token, AddressRequestDTO addressRequestDTO,UUID address_id){
+        String username = jwtUtil.getUsername(token);
 
         AddressEntity addressEntity = addressRepository.findById(address_id).orElseThrow(()-> new BaseException("이미 삭제되었거나 없는 배송지 입니다"));
 
@@ -70,8 +73,8 @@ public class AddressService {
 
     //배송지 정보 삭제
     @Transactional
-    public ApiResponse<String> delete_address(CustomUserDetails customUserDetails, UUID address_id){
-        String username = customUserDetails.getUsername();
+    public ApiResponse<String> delete_address(String token, UUID address_id){
+        String username = jwtUtil.getUsername(token);
         AddressEntity addressEntity = addressRepository.findById(address_id).orElseThrow(() -> new BaseException("이미 삭제되었거나 없는 배송지 입니다."));
 
         //배송지가 해당 유저의 것인지 아닌지 체크
@@ -80,7 +83,7 @@ public class AddressService {
         }
 
         addressRepository.delete(addressEntity);
-        return ApiResponse.success( "회원 탈퇴가 처리 되었습니다");
+        return ApiResponse.success( "배송지 삭제가 처리 되었습니다");
     }
 
 }
