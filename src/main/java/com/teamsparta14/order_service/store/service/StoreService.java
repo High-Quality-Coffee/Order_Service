@@ -2,13 +2,8 @@ package com.teamsparta14.order_service.store.service;
 
 import com.teamsparta14.order_service.global.enums.Role;
 import com.teamsparta14.order_service.store.dto.*;
-import com.teamsparta14.order_service.store.entity.Category;
-import com.teamsparta14.order_service.store.entity.Store;
-import com.teamsparta14.order_service.store.entity.StoreCategory;
-import com.teamsparta14.order_service.store.entity.StoreStatus;
-import com.teamsparta14.order_service.store.repository.StoreCategoryRepository;
-import com.teamsparta14.order_service.store.repository.CategoryRepository;
-import com.teamsparta14.order_service.store.repository.StoreRepository;
+import com.teamsparta14.order_service.store.entity.*;
+import com.teamsparta14.order_service.store.repository.*;
 import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.entity.UserEntity;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
@@ -27,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.teamsparta14.order_service.store.entity.QRegion.region;
+
 @Service
 @RequiredArgsConstructor
 public class StoreService {
@@ -34,6 +31,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
+    private final RegionRepository regionRepository;
 
     // [조회] 가게
     public Page<StoreResponseDto> getAllStores(Pageable pageable, StoreStatus status) {
@@ -56,7 +54,10 @@ public class StoreService {
 
     // [등록] 가게
     @Transactional
-    public StoreResponseDto createStore(StoreRequestDto dto, String createdBy) {
+    public StoreResponseDto createStore(StoreRequestDto dto) {
+
+        Region region = regionRepository.findByRegionName(dto.getRegionName())
+                .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
 
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
@@ -64,6 +65,7 @@ public class StoreService {
                 .phone(dto.getPhone())
                 .isDeleted(false)
                 .status(dto.getStatus() != null ? dto.getStatus() : StoreStatus.OPEN)
+                .region(region)
                 .build();
 
         Store savedStore = storeRepository.save(store);
@@ -167,6 +169,31 @@ public class StoreService {
         }
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
+    }
+
+    // [등록] 지역
+    @Transactional
+    public RegionResponseDto createRegion(RegionRequestDto requestDto) {
+        boolean exists = regionRepository.existsByRegionName(requestDto.getRegionName());
+        if (exists) {
+            throw new IllegalArgumentException("이미 존재하는 지역입니다.");
+        }
+
+        Region region = Region.builder()
+                .regionName(requestDto.getRegionName())
+                .build();
+
+        Region savedRegion = regionRepository.save(region);
+        return new RegionResponseDto(savedRegion);
+    }
+
+
+    // [수정] 점수
+    @Transactional
+    public void updateStoreRating(UUID storeId, int newTotalReviewCount, double newAverageRating) {
+        Store store = getStoreById(storeId);
+        store.updateRating(newTotalReviewCount, newAverageRating);
+        storeRepository.save(store);
     }
 
 }

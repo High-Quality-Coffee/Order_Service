@@ -12,5 +12,6 @@ public class StoreRequestDto {
     private String address;
     private String phone;
     private List<String> categories;
+    private String regionName; // 지역 추가
     private StoreStatus status = StoreStatus.OPEN; // 기본값 설정
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +38,19 @@ public class Store extends BaseEntity {
     @Column(nullable = false)
     private StoreStatus status;
 
+    @OneToMany(mappedBy = "storeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoreCategory> storeCategories;
+
+    @ManyToOne
+    @JoinColumn(name = "region_id", nullable = false)
+    private Region region;
+
+    private int totalReviewCount = 0;
+
+//    private double totalReviewScore = 0;
+
+    private double averageRating = 0;
+
     // 삭제
     public void deleteStore(String deletedBy) {
         setDeleted(java.time.LocalDateTime.now(), deletedBy);
@@ -48,5 +62,11 @@ public class Store extends BaseEntity {
         this.storeName = requestDto.getStoreName();
         this.address = requestDto.getAddress();
         this.phone = requestDto.getPhone();
+    }
+
+    // 리뷰 점수 업데이트
+    public void updateRating(int newTotalReviewCount, double newAverageRating) {
+        this.totalReviewCount = newTotalReviewCount;
+        this.averageRating = newAverageRating;
     }
 }
