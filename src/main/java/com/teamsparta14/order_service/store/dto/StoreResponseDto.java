@@ -15,6 +15,7 @@ public class StoreResponseDto {
     private String address;
     private String phone;
     private List<String> categories;
+    private String regionName;
 
     // 기본 생성자
     public StoreResponseDto(Store store, List<String> categories) {
@@ -28,5 +29,9 @@ public class StoreResponseDto {
                 .map(storeCategory -> storeCategory.getCategoryId().getCategoryName())
                 .collect(Collectors.toList())
                 : Collections.emptyList();
+
+        this.regionName = store.getStoreRegions() != null && !store.getStoreRegions().isEmpty()
+                ? store.getStoreRegions().get(0).getRegionId().getRegionName()
+                : "지역 정보 없음";
     }
 }

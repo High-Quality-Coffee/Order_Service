@@ -2,13 +2,8 @@ package com.teamsparta14.order_service.store.service;
 
 import com.teamsparta14.order_service.global.enums.Role;
 import com.teamsparta14.order_service.store.dto.*;
-import com.teamsparta14.order_service.store.entity.Category;
-import com.teamsparta14.order_service.store.entity.Store;
-import com.teamsparta14.order_service.store.entity.StoreCategory;
-import com.teamsparta14.order_service.store.entity.StoreStatus;
-import com.teamsparta14.order_service.store.repository.StoreCategoryRepository;
-import com.teamsparta14.order_service.store.repository.CategoryRepository;
-import com.teamsparta14.order_service.store.repository.StoreRepository;
+import com.teamsparta14.order_service.store.entity.*;
+import com.teamsparta14.order_service.store.repository.*;
 import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import com.teamsparta14.order_service.user.entity.UserEntity;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
@@ -34,6 +29,8 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
+    private final RegionRepository regionRepository;
+    private final StoreRegionRepository storeRegionRepository;
 
     // [조회] 가게
     public Page<StoreResponseDto> getAllStores(Pageable pageable, StoreStatus status) {
@@ -67,7 +64,12 @@ public class StoreService {
                 .build();
 
         Store savedStore = storeRepository.save(store);
+
         saveStoreCategories(savedStore, dto.getCategories());
+
+        if (dto.getRegionName() != null && !dto.getRegionName().trim().isEmpty()) {
+            saveStoreRegion(savedStore, dto.getRegionName());
+        }
 
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
@@ -167,6 +169,40 @@ public class StoreService {
         }
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
+    }
+
+    // [등록] 지역
+    @Transactional
+    public RegionResponseDto createRegion(RegionRequestDto requestDto) {
+        boolean exists = regionRepository.existsByRegionName(requestDto.getRegionName());
+        if (exists) {
+            throw new IllegalArgumentException("이미 존재하는 지역입니다.");
+        }
+
+        Region region = Region.builder()
+                .regionName(requestDto.getRegionName())
+                .build();
+
+        Region savedRegion = regionRepository.save(region);
+        return new RegionResponseDto(savedRegion);
+    }
+
+    // [등록] 가게-지역
+    private void saveStoreRegion(Store store, String regionName) {
+        if (regionName == null || regionName.trim().isEmpty()) {
+            return;
+        }
+
+        Region region = regionRepository.findByRegionName(regionName)
+                .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + regionName));
+
+        boolean exists = storeRegionRepository.existsByStoreIdAndRegionId(store, region); // ✅ 인스턴스 사용
+        if (exists) {
+            return;
+        }
+
+        StoreRegion storeRegion = new StoreRegion(store, region);
+        storeRegionRepository.save(storeRegion);
     }
 
 //    @Transactional

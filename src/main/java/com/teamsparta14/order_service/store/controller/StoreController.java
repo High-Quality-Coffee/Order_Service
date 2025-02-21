@@ -148,6 +148,13 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId)));
     }
 
+    // [등록] 지역
+    @PreAuthorize("hasAuthority('ROLE_MASTER')")
+    @PostMapping("/regions")
+    public ResponseEntity<ApiResponse<RegionResponseDto>> createRegion(@RequestBody RegionRequestDto requestDto) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.createRegion(requestDto)));
+    }
+
     // [수정] 리뷰 점수
 //    @PostMapping("/{storeId}/rating")
 //    public ResponseEntity<String> updateStoreRating(@PathVariable UUID storeId, @RequestBody RatingUpdateDto ratingUpdateDto) {

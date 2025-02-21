@@ -41,6 +41,9 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "storeId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreCategory> storeCategories;
 
+    @OneToMany(mappedBy = "storeId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoreRegion> storeRegions;
+
     private int totalReviewCount = 0;
 
 //    private double totalReviewScore = 0;
