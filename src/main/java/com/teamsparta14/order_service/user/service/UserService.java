@@ -31,6 +31,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JWTUtil jwtUtil;
 
     //유저 회원가입
     public void user_save(UserRequestDTO userRequestDTO){
@@ -64,6 +65,7 @@ public class UserService {
         userRequestDTO.setPassword(bCryptPasswordEncoder.encode(userRequestDTO.getPassword()));
 
         UserEntity userEntity = modelMapper.map(userRequestDTO, UserEntity.class);
+
         userEntity.setRole(Role.ROLE_OWNER);
         userRepository.save(userEntity);
     }
@@ -81,16 +83,16 @@ public class UserService {
     }
 
     //user 조회
-    public UserResponseDTO findUser(String username){
+    public ApiResponse<UserResponseDTO> findUser(String username){
         ModelMapper modelMapper = new ModelMapper();
-        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(BaseException::new);
-        return modelMapper.map(userEntity,UserResponseDTO.class);
+        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() -> new BaseException("해당 유저를 찾을 수 없습니다."));
+        return ApiResponse.success(modelMapper.map(userEntity,UserResponseDTO.class));
     }
 
     //회원 탈퇴 (soft-delete)
     @Transactional
-    public void deleteUser(CustomUserDetails customUserDetails){
-        String username = customUserDetails.getUsername();
+    public void deleteUser(String token){
+        String username = jwtUtil.getUsername(token);
         UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
         userEntity.delete_user(true);
