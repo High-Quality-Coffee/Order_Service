@@ -53,7 +53,7 @@ public class StoreController {
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
@@ -108,36 +108,37 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(deleteMessage));
     }
 
+    // [조회] 모든 카테고리
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getAllCategories() {
+        return ResponseEntity.ok(ApiResponse.success(storeService.getAllCategories()));
+    }
 
-    // [POST] 카테고리 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    // [조회] 특정 카테고리
+    @GetMapping("/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> getCategoryById(@PathVariable UUID categoryId) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.getCategoryById(categoryId)));
+    }
+
+    // [등록] 카테고리
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
     @PostMapping("/categories")
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
-            @RequestBody CategoryRequestDto requestDto
-    ) {
-        CustomUserDetails userDetails = getAuthenticatedUser();
-        String role = extractRole(userDetails);
-
-        if (!"ADMIN".equals(role)) {
-            throw new RuntimeException("카테고리 등록은 관리자만 가능합니다.");
-        }
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(@RequestBody CategoryRequestDto requestDto) {
         return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto)));
     }
 
-    // 사용자 정보 가져오기 → 확인 필요
-    private CustomUserDetails getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)) {
-            throw new RuntimeException("인증된 사용자가 없습니다.");
-        }
-        return (CustomUserDetails) authentication.getPrincipal();
+    // [수정] 카테고리
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
+    @PutMapping("/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(@PathVariable UUID categoryId, @RequestBody CategoryRequestDto requestDto) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateCategory(categoryId, requestDto)));
     }
 
-    private String extractRole(CustomUserDetails userDetails) {
-        for (GrantedAuthority authority : userDetails.getAuthorities()) {
-            return authority.getAuthority(); // 첫 번째 권한만 반환
-        }
-        throw new RuntimeException("사용자의 역할을 찾을 수 없습니다.");
+    // [삭제] 카테고리
+    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
+    @DeleteMapping("/categories/{categoryId}")
+    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable UUID categoryId) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId)));
     }
 
 }
