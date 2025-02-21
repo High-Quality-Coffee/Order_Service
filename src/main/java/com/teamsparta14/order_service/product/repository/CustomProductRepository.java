@@ -22,4 +22,6 @@ public interface CustomProductRepository {
     Optional<Product> findByProductId(UUID productId);
 
     List<Product> searchProductByIdList(ProductSearchDto requestDto);
+
+    UUID findStoreIdByProductId(UUID productId);
 }

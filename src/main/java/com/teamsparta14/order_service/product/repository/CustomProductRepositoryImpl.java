@@ -59,6 +59,15 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
 
     }
 
+    @Override
+    public UUID findStoreIdByProductId(UUID productId) {
+        return queryFactory
+                .select(product.storeId)
+                .from(product)
+                .where(product.id.eq(productId))
+                .fetchOne();
+    }
+
     //공통 쿼리 메서드
     private List<Product> getProductQuery(UUID storeId, String keyword, Pageable pageable, SortBy sortBy, ProductStatus status) {
         int pageSize = validatePageSize(pageable.getPageSize());

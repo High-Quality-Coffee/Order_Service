@@ -70,18 +70,25 @@ public class ProductController {
 
     //상품 등록
     @PostMapping("/products")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> createProduct(@RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> createProduct(
+            @RequestHeader("access") String token,
+            @RequestBody ProductRequestDto requestDto
+    ) {
 
-        ProductResponseDto responseDto = productService.addProduct(requestDto.getStoreId(), requestDto);
+        ProductResponseDto responseDto = productService.addProduct(token, requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
 
     //상품 수정
     @PutMapping("/products/{productId}")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProduct(
+            @RequestHeader("access") String token,
+            @PathVariable("productId") UUID productId,
+            @RequestBody ProductRequestDto requestDto
+    ) {
 
-        ProductResponseDto responseDto = productService.updateProduct(productId, requestDto);
+        ProductResponseDto responseDto = productService.updateProduct(token, productId, requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
@@ -89,27 +96,34 @@ public class ProductController {
     //상품 상태 변경
     @PatchMapping("/products/{productId}/status")
     public ResponseEntity<ProductResponseDto> updateProductStatus(
+            @RequestHeader("access") String token,
             @PathVariable("productId") UUID productId,
             @RequestParam("status") ProductStatus status
     ) {
-        ProductResponseDto responseDto = productService.updateProductStatus(productId, status);
+        ProductResponseDto responseDto = productService.updateProductStatus(token, productId, status);
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
 
     //상품 수량 업데이트
     @PutMapping("/products/{productId}/order")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProductQuantity(@PathVariable("productId") UUID productId, @RequestBody ProductRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> updateProductQuantity(
+            @RequestHeader("access") String token,
+            @PathVariable("productId") UUID productId,
+            @RequestBody ProductRequestDto requestDto
+    ) {
 
-        ProductResponseDto responseDto = productService.updateProductQuantity(productId, requestDto);
+        ProductResponseDto responseDto = productService.updateProductQuantity(token, productId, requestDto);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
 
     //상품 삭제
     @PostMapping("/products/{productId}")
-    public ResponseEntity<ApiResponse<ProductResponseDto>> deleteProduct(@PathVariable("productId") UUID productId) {
+    public ResponseEntity<ApiResponse<ProductResponseDto>> deleteProduct(
+            @RequestHeader("access") String token,
+            @PathVariable("productId") UUID productId) {
 
-        return ResponseEntity.ok().body(ApiResponse.success(productService.deleteProduct(productId)));
+        return ResponseEntity.ok().body(ApiResponse.success(productService.deleteProduct(token, productId)));
     }
 
 
