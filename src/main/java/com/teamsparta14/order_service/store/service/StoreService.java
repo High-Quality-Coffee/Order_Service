@@ -56,7 +56,7 @@ public class StoreService {
 
     // [등록] 가게
     @Transactional
-    public StoreResponseDto createStore(StoreRequestDto dto, String createdBy) {
+    public StoreResponseDto createStore(StoreRequestDto dto) {
 
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
@@ -167,6 +167,19 @@ public class StoreService {
         }
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
+    }
+
+//    @Transactional
+//    public void deleteStoreCategory(UUID storeId) {
+//        storeCategoryRepository.deleteByStoreId(storeId);
+//    }
+
+    // [수정] 점수
+    @Transactional
+    public void updateStoreRating(UUID storeId, int newTotalReviewCount, double newAverageRating) {
+        Store store = getStoreById(storeId);
+        store.updateRating(newTotalReviewCount, newAverageRating);
+        storeRepository.save(store);
     }
 
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 public class StoreResponseDto {
@@ -14,7 +15,6 @@ public class StoreResponseDto {
     private String address;
     private String phone;
     private List<String> categories;
-    private String createdBy;
 
     // 기본 생성자
     public StoreResponseDto(Store store, List<String> categories) {
@@ -22,7 +22,11 @@ public class StoreResponseDto {
         this.storeName = store.getStoreName();
         this.address = store.getAddress();
         this.phone = store.getPhone();
-        this.createdBy = store.getCreatedBy();
-        this.categories = categories != null ? categories : Collections.emptyList(); //빈값이 아니면 카테고리
+
+        this.categories = store.getStoreCategories() != null
+                ? store.getStoreCategories().stream()
+                .map(storeCategory -> storeCategory.getCategoryId().getCategoryName())
+                .collect(Collectors.toList())
+                : Collections.emptyList();
     }
 }

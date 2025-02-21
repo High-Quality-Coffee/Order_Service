@@ -52,6 +52,13 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(stores));
     }
 
+    // [GET] 특정 가게 조회
+    @GetMapping("/{storeId}")
+    public ResponseEntity<Store> getStore(@PathVariable UUID storeId) {
+        Store store = storeService.getStoreById(storeId);
+        return ResponseEntity.ok(store);
+    }
+
     // [POST] 가게 등록
     @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
     @PostMapping
@@ -59,8 +66,8 @@ public class StoreController {
             @RequestBody StoreRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        String createdBy = customUserDetails.getUsername();
-        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, createdBy)));
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto)));
     }
 
     // [PUT] 가게 정보 수정
@@ -141,4 +148,10 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId)));
     }
 
+    // [수정] 리뷰 점수
+//    @PostMapping("/{storeId}/rating")
+//    public ResponseEntity<String> updateStoreRating(@PathVariable UUID storeId, @RequestBody RatingUpdateDto ratingUpdateDto) {
+//        storeService.updateStoreRating(storeId, ratingUpdateDto.getTotalReviewCount(), ratingUpdateDto.getAverageRating());
+//        return ResponseEntity.ok("업체 평점이 업데이트되었습니다.");
+//    }
 }
