@@ -28,7 +28,7 @@ public class ProductClient {
     private final String SERVER_URL = "http://localhost:8080";
 
 
-    public List<ProductResponseDto> searchProductList(List<OrderProductRequest> orderProductRequests, String token) {
+    public List<ProductResponseDto> searchProductList(List<UUID> productIds, String token) {
 
         URI uri = UriComponentsBuilder
                 .fromUriString(SERVER_URL)
@@ -37,9 +37,8 @@ public class ProductClient {
                 .build()
                 .toUri();
 
-        List<UUID> requestIdList = orderProductRequests.stream().map(OrderProductRequest::getProductId).toList();
         Map<String, List<UUID>> requestBody = new HashMap<>();
-        requestBody.put("requestIdList", requestIdList);
+        requestBody.put("requestIdList", productIds);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();

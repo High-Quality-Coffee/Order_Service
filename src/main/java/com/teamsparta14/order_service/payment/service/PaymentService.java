@@ -1,5 +1,6 @@
 package com.teamsparta14.order_service.payment.service;
 
+import com.teamsparta14.order_service.payment.dto.PaymentResponse;
 import com.teamsparta14.order_service.payment.dto.PaymentUpdateDto;
 import com.teamsparta14.order_service.payment.entity.Payment;
 import com.teamsparta14.order_service.payment.repository.PaymentRepository;
@@ -16,22 +17,24 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public Payment updatePayment(PaymentUpdateDto paymentUpdateDto, String userName) {
+    public PaymentResponse updatePayment(PaymentUpdateDto paymentUpdateDto, String userName) {
 
-        Payment payment  = paymentRepository.findById(paymentUpdateDto.getPaymentId()).orElseThrow(
-                () -> new IllegalArgumentException("Not found Payment")
-        );
-
-        if (!userName.equals(payment.getUserName())){
-            throw new IllegalArgumentException("Not Own Payment");
-        }
+        Payment payment  = getPaymentByPaymentId(paymentUpdateDto.getPaymentId(),userName);
 
         payment.setPaymentStatus(paymentUpdateDto.getPaymentStatus());
 
-        return payment;
+        return PaymentResponse.from(payment);
     }
 
-    public Payment getPayment(UUID paymentId, String userName) {
+    public PaymentResponse getPayment(UUID paymentId, String userName) {
+
+        Payment payment = getPaymentByPaymentId(paymentId,userName);
+
+        return PaymentResponse.from(payment);
+
+    }
+
+    public Payment getPaymentByPaymentId(UUID paymentId, String userName){
         Payment payment  = paymentRepository.findById(paymentId).orElseThrow(
                 () -> new IllegalArgumentException("Not found Payment")
         );
@@ -39,8 +42,6 @@ public class PaymentService {
         if (!userName.equals(payment.getUserName())){
             throw new IllegalArgumentException("Not Own Payment");
         }
-
         return payment;
-
     }
 }

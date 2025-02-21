@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 
 public interface OrderRepository extends JpaRepository<MyOrder, UUID>, OrderCustomRepository {
-    Optional<MyOrder> findByOrderIdAndDeletedAtIsNull(UUID orderId);
+    Optional<MyOrder> findByOrderIdAndIsDeletedFalse(UUID orderId);
 
     @Query("SELECT o FROM MyOrder o JOIN FETCH o.payment JOIN FETCH o.orderProducts WHERE o.orderId = :orderId")
     Optional<MyOrder> findOrderWithProductsWithPayment(@Param("orderId") UUID orderId);

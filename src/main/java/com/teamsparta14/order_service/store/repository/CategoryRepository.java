@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface
 CategoryRepository extends JpaRepository<Category, UUID> {
     List<Category> findByCategoryNameIn(List<String> categoryNames);
+
+    boolean existsByCategoryName(String categoryName);
 }

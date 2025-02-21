@@ -38,6 +38,9 @@ public class MyOrder extends BaseEntity {
     @Column(name = "dest_id", nullable = false)
     private UUID destId;
 
+    @Column(name = "is_deleted")
+    Boolean isDeleted;
+
     @Column(name = "order_comment", nullable = true, length = 1000)
     private String orderComment;
 

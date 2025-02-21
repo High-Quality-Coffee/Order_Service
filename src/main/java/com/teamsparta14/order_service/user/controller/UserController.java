@@ -42,10 +42,10 @@ public class UserController {
     @PostMapping("/api/auth/join/manager")
     public void manager_join(@RequestBody @Valid UserRequestDTO userRequestDTO) {userService.manager_save(userRequestDTO);}
 
-    //유저 조회
+    //유저 조회, Master만 가능
     @GetMapping("/api/user/list/{username}")
-    public UserResponseDTO user_list(@PathVariable("username") String username) {
-        return userService.findUser(username);
+    public  ResponseEntity<ApiResponse<UserResponseDTO>> user_list(@PathVariable("username") String username) {
+        return ResponseEntity.ok(userService.findUser(username));
     }
 
     //토큰 재발급
@@ -54,10 +54,10 @@ public class UserController {
         return tokenReissueService.token_reissue(request,response);
     }
 
-    //회원탈퇴
+    //회원탈퇴, 유저만 가능
     @DeleteMapping("/api/auth/delete")
-    public ResponseEntity<ApiResponse<String>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails){
-        userService.deleteUser(customUserDetails);
+    public ResponseEntity<ApiResponse<String>> deleteUser(@RequestHeader(name = "access") String token){
+        userService.deleteUser(token);
         return ResponseEntity.ok().body(ApiResponse.success("회원탈퇴가 진행되었습니다"));
     }
 

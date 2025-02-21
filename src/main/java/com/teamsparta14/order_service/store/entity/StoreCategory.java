@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor // 기본 생성자 필수
+@NoArgsConstructor
 @Builder
 @IdClass(StoreCategoryId.class) // 복합 키 설정
 @Table(name = "p_store_category")
@@ -23,5 +23,4 @@ public class StoreCategory extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category categoryId;
-
 }

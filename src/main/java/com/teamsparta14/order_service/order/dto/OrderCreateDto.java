@@ -26,6 +26,7 @@ public class OrderCreateDto {
         return MyOrder.builder()
                 .userName(userName)
                 .storeId(storeId)
+                .isDeleted(false)
                 .orderComment(orderComment)
                 .orderProducts(new ArrayList<>())
                 .destId(destId)

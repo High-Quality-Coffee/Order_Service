@@ -75,7 +75,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화 (POST 요청 허용)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/join/**", "/api/auth/login","/swagger-ui/**","/swagger-resources/**","/v3/api-docs/**").permitAll()  // 회원가입은 인증 없이 가능
-                        .requestMatchers("/api/address/**").hasRole("USER")
+                        .requestMatchers("/api/address/**", "/api/auth/delete").hasRole("USER")
+                        .requestMatchers("/api/user/list/{username}").hasRole("MASTER")
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
 //                        .anyRequest().permitAll()  // 그 외 모든 요청은 인증 필요
                 )
