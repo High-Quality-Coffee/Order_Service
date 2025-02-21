@@ -44,7 +44,7 @@ public class Review  extends BaseEntity {
                 .storeId(requestDto.getStoreId())
                 .userName(user)
                 .review(requestDto.getReview())
-                .star(requestDto.getStar())
+                .star(requestDto.getStar() != null ? requestDto.getStar() : Stars.ZERO)
                 .build();
     }
 
@@ -52,7 +52,7 @@ public class Review  extends BaseEntity {
         this.storeId = requestDto.getStoreId();
         this.userName = user;
         this.review = requestDto.getReview();
-        this.star = requestDto.getStar();
+        this.star = requestDto.getStar() != null ? requestDto.getStar() : Stars.ZERO;
     }
 
     public void delete() {
