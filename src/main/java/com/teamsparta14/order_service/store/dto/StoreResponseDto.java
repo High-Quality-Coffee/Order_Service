@@ -30,8 +30,6 @@ public class StoreResponseDto {
                 .collect(Collectors.toList())
                 : Collections.emptyList();
 
-        this.regionName = store.getStoreRegions() != null && !store.getStoreRegions().isEmpty()
-                ? store.getStoreRegions().get(0).getRegionId().getRegionName()
-                : "지역 정보 없음";
+        this.regionName = store.getRegion() != null ? store.getRegion().getRegionName() : "지역 정보 없음";
     }
 }

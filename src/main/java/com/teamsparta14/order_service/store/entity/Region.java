@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,6 +22,10 @@ public class Region extends BaseEntity {
     @Column(name = "region_id")
     private UUID id;
 
-    @Column(name = "region_name", nullable = false, unique = true, length = 50)
+    @Column(name = "region_name", nullable = false, length = 50, unique = true)
     private String regionName;
+
+    @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Store> stores;
 }
+

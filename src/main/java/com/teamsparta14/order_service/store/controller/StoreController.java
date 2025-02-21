@@ -29,13 +29,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/stores")
+@RequestMapping("/api")
 public class StoreController {
 
     private final StoreService storeService;
 
     // [GET] 전체 가게 조회
-    @GetMapping
+    @GetMapping("/stores")
     public ResponseEntity<ApiResponse<Page<StoreResponseDto>>> getAllStores(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -53,7 +53,7 @@ public class StoreController {
     }
 
     // [GET] 특정 가게 조회
-    @GetMapping("/{storeId}")
+    @GetMapping("/stores/{storeId}")
     public ResponseEntity<Store> getStore(@PathVariable UUID storeId) {
         Store store = storeService.getStoreById(storeId);
         return ResponseEntity.ok(store);
@@ -61,7 +61,7 @@ public class StoreController {
 
     // [POST] 가게 등록
     @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
-    @PostMapping
+    @PostMapping("/stores")
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
@@ -72,7 +72,7 @@ public class StoreController {
 
     // [PUT] 가게 정보 수정
     @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
-    @PutMapping("/{storeId}")
+    @PutMapping("/stores/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
             @RequestBody StoreUpdateRequestDto requestDto,
@@ -95,7 +95,7 @@ public class StoreController {
 
     // [DELETE] 가게 삭제
     @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
-    @DeleteMapping("/{storeId}")
+    @DeleteMapping("stores/{storeId}")
     public ResponseEntity<ApiResponse<String>> deleteStore(
             @PathVariable("storeId") UUID storeId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails

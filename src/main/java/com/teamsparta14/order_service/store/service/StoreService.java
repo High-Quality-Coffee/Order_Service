@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.teamsparta14.order_service.store.entity.QRegion.region;
+
 @Service
 @RequiredArgsConstructor
 public class StoreService {
@@ -30,7 +32,6 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final RegionRepository regionRepository;
-    private final StoreRegionRepository storeRegionRepository;
 
     // [조회] 가게
     public Page<StoreResponseDto> getAllStores(Pageable pageable, StoreStatus status) {
@@ -55,21 +56,20 @@ public class StoreService {
     @Transactional
     public StoreResponseDto createStore(StoreRequestDto dto) {
 
+        Region region = regionRepository.findByRegionName(dto.getRegionName())
+                .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
+
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
                 .address(dto.getAddress())
                 .phone(dto.getPhone())
                 .isDeleted(false)
                 .status(dto.getStatus() != null ? dto.getStatus() : StoreStatus.OPEN)
+                .region(region)
                 .build();
 
         Store savedStore = storeRepository.save(store);
-
         saveStoreCategories(savedStore, dto.getCategories());
-
-        if (dto.getRegionName() != null && !dto.getRegionName().trim().isEmpty()) {
-            saveStoreRegion(savedStore, dto.getRegionName());
-        }
 
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
@@ -187,28 +187,6 @@ public class StoreService {
         return new RegionResponseDto(savedRegion);
     }
 
-    // [등록] 가게-지역
-    private void saveStoreRegion(Store store, String regionName) {
-        if (regionName == null || regionName.trim().isEmpty()) {
-            return;
-        }
-
-        Region region = regionRepository.findByRegionName(regionName)
-                .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + regionName));
-
-        boolean exists = storeRegionRepository.existsByStoreIdAndRegionId(store, region); // ✅ 인스턴스 사용
-        if (exists) {
-            return;
-        }
-
-        StoreRegion storeRegion = new StoreRegion(store, region);
-        storeRegionRepository.save(storeRegion);
-    }
-
-//    @Transactional
-//    public void deleteStoreCategory(UUID storeId) {
-//        storeCategoryRepository.deleteByStoreId(storeId);
-//    }
 
     // [수정] 점수
     @Transactional
