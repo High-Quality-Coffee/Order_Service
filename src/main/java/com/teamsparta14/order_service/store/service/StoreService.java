@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class StoreService {
     private final StoreCategoryRepository storeCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final RegionRepository regionRepository;
+    private final JWTUtil jwtUtil;
 
     // [조회] 가게
     public Page<StoreResponseDto> getAllStores(Pageable pageable, StoreStatus status) {
@@ -54,8 +56,9 @@ public class StoreService {
 
     // [등록] 가게
     @Transactional
-    public StoreResponseDto createStore(StoreRequestDto dto) {
+    public StoreResponseDto createStore(StoreRequestDto dto, String token) {
 
+        String currentUsername = jwtUtil.getUsername(token);
         Region region = regionRepository.findByRegionName(dto.getRegionName())
                 .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
 
@@ -68,6 +71,7 @@ public class StoreService {
                 .region(region)
                 .build();
 
+        store.setCreatedBy(currentUsername);
         Store savedStore = storeRepository.save(store);
         saveStoreCategories(savedStore, dto.getCategories());
 
@@ -111,7 +115,7 @@ public class StoreService {
                 .collect(Collectors.toList());
     }
 
-    // [등록] 카테고리 저장
+    // [등록] 가게와 카테고리 저장
     private void saveStoreCategories(Store store, List<String> categoryNames) {
         List<Category> categories = categoryRepository.findByCategoryNameIn(categoryNames);
         List<StoreCategory> storeCategories = categories.stream()
@@ -136,9 +140,12 @@ public class StoreService {
 
     // [등록] 카테고리
     @Transactional
-    public CategoryResponseDto createCategory(CategoryRequestDto dto) {
+    public CategoryResponseDto createCategory(CategoryRequestDto dto, String role) {
 
-        // 카테고리 중복 체크
+        if ("ROLE_OWNER".equals(role)) {
+            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 등록할 수 없습니다.");
+        }
+
         boolean exists = categoryRepository.existsByCategoryName(dto.getCategoryName());
         if (exists) {
             throw new IllegalArgumentException("이미 존재하는 카테고리입니다.");
@@ -154,33 +161,50 @@ public class StoreService {
 
     // [수정] 카테고리
     @Transactional
-    public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto) {
+    public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto, String role) {
+
+        if ("ROLE_OWNER".equals(role)) {
+            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 수정할 수 없습니다.");
+        }
+
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("해당 카테고리를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다."));
+
         category.setCategoryName(dto.getCategoryName());
         return new CategoryResponseDto(categoryRepository.save(category));
     }
 
     // [삭제] 카테고리
     @Transactional
-    public String deleteCategory(UUID categoryId) {
+    public String deleteCategory(UUID categoryId, String role) {
+
         if (!categoryRepository.existsById(categoryId)) {
-            throw new RuntimeException("해당 카테고리를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다.");
         }
+
+        if ("ROLE_OWNER".equals(role)) {
+            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 삭제할 수 없습니다.");
+        }
+
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
     }
 
     // [등록] 지역
     @Transactional
-    public RegionResponseDto createRegion(RegionRequestDto requestDto) {
-        boolean exists = regionRepository.existsByRegionName(requestDto.getRegionName());
+    public RegionResponseDto createRegion(RegionRequestDto dto, String role) {
+
+        if ("ROLE_OWNER".equals(role)) {
+            throw new IllegalArgumentException("권한이 없습니다. 지역을 등록할 수 없습니다.");
+        }
+
+        boolean exists = regionRepository.existsByRegionName(dto.getRegionName());
         if (exists) {
             throw new IllegalArgumentException("이미 존재하는 지역입니다.");
         }
 
         Region region = Region.builder()
-                .regionName(requestDto.getRegionName())
+                .regionName(dto.getRegionName())
                 .build();
 
         Region savedRegion = regionRepository.save(region);
