@@ -1,17 +1,24 @@
 package com.teamsparta14.order_service.review.service;
 
 import com.teamsparta14.order_service.product.entity.SortBy;
+import com.teamsparta14.order_service.review.dto.RatingDto;
 import com.teamsparta14.order_service.review.dto.ReviewRequestDto;
 import com.teamsparta14.order_service.review.dto.ReviewResponseDto;
 import com.teamsparta14.order_service.review.entity.Review;
 import com.teamsparta14.order_service.review.repository.ReviewRepository;
+import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +30,12 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final RestClient restClient;
+    private final JWTUtil jwtUtil;
 
     //리뷰 전체 조회
     public List<ReviewResponseDto> getReviews(UUID storeId, Pageable pageable, SortBy sortBy) {
+
         List<Review> reviewList = reviewRepository.findAllByStoreId(storeId, pageable, sortBy);
         List<ReviewResponseDto> responseDtoList = new ArrayList<>();
 
@@ -47,37 +57,65 @@ public class ReviewService {
 
     //리뷰 등록
     @Transactional
-    public ReviewResponseDto createReview(ReviewRequestDto requestDto, String user) {
+    public ReviewResponseDto createReview(ReviewRequestDto requestDto, String token) {
+
+        String userName = jwtUtil.getUsername(token);
         
         //작성한 리뷰가 있는지 확인
-        if (reviewRepository.existsByStoreIdAndUserName(requestDto.getStoreId(), user)) {
+        if (reviewRepository.existsByStoreIdAndUserName(requestDto.getStoreId(), userName)) {
             throw new IllegalArgumentException("이미 작성한 리뷰가 있습니다.");
         }
 
-        Review review = reviewRepository.save(Review.from(requestDto, user));
+        Review review = reviewRepository.save(Review.from(requestDto, userName));
+        
+        //가게로 별점 보내기
+        RatingDto ratingDto = new RatingDto(review.getStar());
+
+        //storeId와 별점을 전달할 URL
+        URI uri = UriComponentsBuilder
+                .fromUriString("http://localhost:8080")
+                .path("/api/stores/" + review.getStoreId() + "/rating")
+                .encode()
+                .build()
+                .toUri();
+
+        /*Consumer<HttpHeaders> headers = httpHeaders -> {
+        };*/
+
+        ResponseEntity<String> requestEntity =
+                restClient
+                        .method(HttpMethod.POST)
+                        .uri(uri)
+                        //.headers(headers)
+                        .body(ratingDto)
+                        .retrieve()
+                        .toEntity(String.class);
+        System.out.println(ratingDto.getStar());
 
         return ReviewResponseDto.of(review);
     }
 
     //리뷰 수정
     @Transactional
-    public ReviewResponseDto updateReview(UUID reviewId, ReviewRequestDto requestDto, String user) {
+    public ReviewResponseDto updateReview(UUID reviewId, ReviewRequestDto requestDto, String token) {
 
-        Review review = checkWriterAndFind(reviewId, user);
+        String userName = jwtUtil.getUsername(token);
+        Review review = checkWriterAndFind(reviewId, userName);
 
-        review.update(requestDto, user);
+        review.update(requestDto, userName);
 
         return ReviewResponseDto.of(review);
     }
 
     //리뷰 삭제
     @Transactional
-    public ReviewResponseDto deleteReview(UUID reviewId, String user) {
+    public ReviewResponseDto deleteReview(UUID reviewId, String token) {
 
-        Review review = checkWriterAndFind(reviewId, user);
+        String userName = jwtUtil.getUsername(token);
+        Review review = checkWriterAndFind(reviewId, userName);
 
         review.delete();
-        review.setDeleted(LocalDateTime.now(), user);
+        review.setDeleted(LocalDateTime.now(), userName);
 
         return ReviewResponseDto.of(review);
     }

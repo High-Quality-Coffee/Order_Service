@@ -5,12 +5,10 @@ import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.review.dto.ReviewRequestDto;
 import com.teamsparta14.order_service.review.dto.ReviewResponseDto;
 import com.teamsparta14.order_service.review.service.ReviewService;
-import com.teamsparta14.order_service.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,11 +48,11 @@ public class ReviewController {
     //리뷰 등록
     @PostMapping
     public ResponseEntity<ApiResponse<ReviewResponseDto>> createReview(
-            @RequestBody ReviewRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestBody ReviewRequestDto requestDto,
+            @RequestHeader("access") String token
     ) {
-        String user = customUserDetails.getUsername();
 
-        ReviewResponseDto responseDto = reviewService.createReview(requestDto, user);
+        ReviewResponseDto responseDto = reviewService.createReview(requestDto, token);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
@@ -62,11 +60,12 @@ public class ReviewController {
     //리뷰 수정
     @PutMapping("/{reviewId}")
     public ResponseEntity<ApiResponse<ReviewResponseDto>> updateReview(
-            @PathVariable("reviewId") UUID reviewId, @RequestBody ReviewRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @PathVariable("reviewId") UUID reviewId,
+            @RequestBody ReviewRequestDto requestDto,
+            @RequestHeader("access") String token
     ) {
-        String user = customUserDetails.getUsername();
 
-        ReviewResponseDto responseDto = reviewService.updateReview(reviewId, requestDto, user);
+        ReviewResponseDto responseDto = reviewService.updateReview(reviewId, requestDto, token);
 
         return ResponseEntity.ok().body(ApiResponse.success(responseDto));
     }
@@ -74,11 +73,10 @@ public class ReviewController {
     //리뷰 삭제
     @PatchMapping("/{reviewId}")
     public ResponseEntity<ApiResponse<ReviewResponseDto>> deleteReview(
-            @PathVariable("reviewId") UUID reviewId, @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @PathVariable("reviewId") UUID reviewId,
+            @RequestHeader("access") String token
     ) {
 
-        String user = customUserDetails.getUsername();
-
-        return ResponseEntity.ok().body(ApiResponse.success(reviewService.deleteReview(reviewId, user)));
+        return ResponseEntity.ok().body(ApiResponse.success(reviewService.deleteReview(reviewId, token)));
     }
 }

@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/address/**", "/api/auth/delete").hasRole("USER")
                         .requestMatchers("/api/user/list/{username}").hasRole("MASTER")
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
+//                        .anyRequest().permitAll()  // 그 외 모든 요청은 인증 필요
                 )
                 .formLogin(login -> login.disable())  // 기본 로그인 폼 비활성화
                 .httpBasic(basic -> basic.disable()); // HTTP Basic 인증 비활성화
