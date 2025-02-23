@@ -45,7 +45,7 @@ public class StoreService {
             stores = storeRepository.findByIsDeletedFalse(pageable);
         }
 
-        return stores.map(store -> new StoreResponseDto(store, getCategoryNames(store.getId())));
+        return stores.map(store -> new StoreResponseDto(store));
     }
 
     // [조회] 특정 가게
@@ -82,7 +82,7 @@ public class StoreService {
 
         storeRepository.save(savedStore);
 
-        return new StoreResponseDto(savedStore, dto.getCategories());
+        return new StoreResponseDto(savedStore);
     }
 
     // [수정] 가게
@@ -94,7 +94,7 @@ public class StoreService {
         store.update(requestDto);
         storeRepository.save(store);
 
-        return new StoreResponseDto(store, requestDto.getCategories());
+        return new StoreResponseDto(store);
     }
 
     // [삭제] 가게

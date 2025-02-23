@@ -18,7 +18,7 @@ public class StoreResponseDto {
     private String regionName;
 
     // 기본 생성자
-    public StoreResponseDto(Store store, List<String> categories) {
+    public StoreResponseDto(Store store) {
         this.id = store.getId();
         this.storeName = store.getStoreName();
         this.address = store.getAddress();

@@ -4,7 +4,6 @@ package com.teamsparta14.order_service.order.repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamsparta14.order_service.global.response.ProductClientResponse;
-import com.teamsparta14.order_service.order.dto.OrderProductRequest;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;

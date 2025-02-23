@@ -8,13 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RestControllerAdvice
+//@RestControllerAdvice(annotations = {RestController.class})
 public class GlobalExceptionHandler {
 
     // ✅ 데이터 무결성 예외 처리 (중복된 이메일, 유저명 등)

@@ -56,9 +56,10 @@ public class StoreController {
 
     // [GET] 특정 가게 조회
     @GetMapping("/stores/{storeId}")
-    public ResponseEntity<Store> getStore(@PathVariable UUID storeId) {
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable UUID storeId) {
         Store store = storeService.getStoreById(storeId);
-        return ResponseEntity.ok(store);
+        StoreResponseDto storeResponseDto =  new StoreResponseDto(store);
+        return ResponseEntity.ok(ApiResponse.success(storeResponseDto));
     }
 
     // [POST] 가게 등록
