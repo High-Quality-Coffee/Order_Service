@@ -12,6 +12,7 @@ import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Request;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ import java.util.UUID;
 public class StoreController {
 
     private final StoreService storeService;
+    private final JWTUtil jWTUtil;
 
     // [GET] 전체 가게 조회
     @GetMapping("/stores")
@@ -60,14 +62,14 @@ public class StoreController {
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
     @PostMapping("/stores")
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader(name = "access") String token
     ) {
+        String createdBy = jWTUtil.getUsername(token);
 
-        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, createdBy)));
     }
 
     // [PUT] 가게 정보 수정
@@ -128,31 +130,62 @@ public class StoreController {
     }
 
     // [등록] 카테고리
-    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
     @PostMapping("/categories")
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(@RequestBody CategoryRequestDto requestDto) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto)));
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
+            @RequestBody CategoryRequestDto requestDto,
+            @RequestHeader(name = "access") String token
+    ) {
+        String role = jWTUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(role)) {
+            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto, role)));
     }
 
     // [수정] 카테고리
-    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
     @PutMapping("/categories/{categoryId}")
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(@PathVariable UUID categoryId, @RequestBody CategoryRequestDto requestDto) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateCategory(categoryId, requestDto)));
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(
+            @PathVariable UUID categoryId,
+            @RequestBody CategoryRequestDto requestDto,
+            @RequestHeader(name = "access") String token
+    ) {
+        String role = jWTUtil.getRole(token);
+        if (!"ROLE_MASTER".equals(role)) {
+            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateCategory(categoryId, requestDto, role)));
     }
 
     // [삭제] 카테고리
-    @PreAuthorize("hasAnyAuthority('ROLE_MASTER')")
     @DeleteMapping("/categories/{categoryId}")
-    public ResponseEntity<ApiResponse<String>> deleteCategory(@PathVariable UUID categoryId) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId)));
+    public ResponseEntity<ApiResponse<String>> deleteCategory(
+            @PathVariable UUID categoryId,
+            @RequestHeader(name = "access") String token
+    ) {
+        String role = jWTUtil.getRole(token);
+        if (!"ROLE_MASTER".equals(role)) {
+            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId, role)));
     }
 
     // [등록] 지역
-    @PreAuthorize("hasAuthority('ROLE_MASTER')")
     @PostMapping("/regions")
-    public ResponseEntity<ApiResponse<RegionResponseDto>> createRegion(@RequestBody RegionRequestDto requestDto) {
-        return ResponseEntity.ok(ApiResponse.success(storeService.createRegion(requestDto)));
+    public ResponseEntity<ApiResponse<RegionResponseDto>> createRegion(
+            @RequestBody RegionRequestDto requestDto,
+            @RequestHeader(name = "access") String token
+    ) {
+        String role = jWTUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(role)) {
+            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.createRegion(requestDto, role)));
     }
 
     // [수정] 리뷰 점수
