@@ -137,6 +137,10 @@ public class StoreController {
     ) {
         String role = jWTUtil.getRole(token);
 
+        if (!"ROLE_MASTER".equals(role)) {
+            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
+        }
+
         return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto, role)));
     }
 

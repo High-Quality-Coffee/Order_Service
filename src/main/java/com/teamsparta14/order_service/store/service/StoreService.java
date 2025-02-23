@@ -137,8 +137,6 @@ public class StoreService {
         return storeCategoryRepository.saveAll(storeCategories);
     }
 
-
-
     // [조회] 모든 카테고리
     public List<CategoryResponseDto> getAllCategories() {
         return categoryRepository.findAll().stream()
@@ -157,10 +155,6 @@ public class StoreService {
     @Transactional
     public CategoryResponseDto createCategory(CategoryRequestDto dto, String role) {
 
-        if ("ROLE_OWNER".equals(role)) {
-            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 등록할 수 없습니다.");
-        }
-
         boolean exists = categoryRepository.existsByCategoryName(dto.getCategoryName());
         if (exists) {
             throw new IllegalArgumentException("이미 존재하는 카테고리입니다.");
@@ -178,10 +172,6 @@ public class StoreService {
     @Transactional
     public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto, String role) {
 
-        if ("ROLE_OWNER".equals(role)) {
-            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 수정할 수 없습니다.");
-        }
-
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다."));
 
@@ -197,10 +187,6 @@ public class StoreService {
             throw new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다.");
         }
 
-        if ("ROLE_OWNER".equals(role)) {
-            throw new IllegalArgumentException("권한이 없습니다. 카테고리를 삭제할 수 없습니다.");
-        }
-
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
     }
@@ -208,10 +194,6 @@ public class StoreService {
     // [등록] 지역
     @Transactional
     public RegionResponseDto createRegion(RegionRequestDto dto, String role) {
-
-        if ("ROLE_OWNER".equals(role)) {
-            throw new IllegalArgumentException("권한이 없습니다. 지역을 등록할 수 없습니다.");
-        }
 
         boolean exists = regionRepository.existsByRegionName(dto.getRegionName());
         if (exists) {
