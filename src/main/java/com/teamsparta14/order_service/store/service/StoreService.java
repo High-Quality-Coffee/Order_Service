@@ -56,9 +56,8 @@ public class StoreService {
 
     // [등록] 가게
     @Transactional
-    public StoreResponseDto createStore(StoreRequestDto dto, String token) {
+    public StoreResponseDto createStore(StoreRequestDto dto, String createdby) {
 
-        String currentUsername = jwtUtil.getUsername(token);
         Region region = regionRepository.findByRegionName(dto.getRegionName())
                 .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
 
@@ -71,9 +70,17 @@ public class StoreService {
                 .region(region)
                 .build();
 
-        store.setCreatedBy(currentUsername);
+        store.setCreatedBy(createdby);
         Store savedStore = storeRepository.save(store);
-        saveStoreCategories(savedStore, dto.getCategories());
+
+        if (dto.getCategories() == null || dto.getCategories().isEmpty()) {
+            dto.setCategories(List.of());
+        }
+
+        List<StoreCategory> storeCategories = saveStoreCategories(savedStore, dto.getCategories());
+        savedStore.setStoreCategories(storeCategories);
+
+        storeRepository.save(savedStore);
 
         return new StoreResponseDto(savedStore, dto.getCategories());
     }
@@ -116,13 +123,21 @@ public class StoreService {
     }
 
     // [등록] 가게와 카테고리 저장
-    private void saveStoreCategories(Store store, List<String> categoryNames) {
+    private List<StoreCategory> saveStoreCategories(Store store, List<String> categoryNames) {
         List<Category> categories = categoryRepository.findByCategoryNameIn(categoryNames);
+
+        if (categories.size() != categoryNames.size()) {
+            throw new IllegalArgumentException("일부 카테고리가 존재하지 않습니다: " + categoryNames);
+        }
+
         List<StoreCategory> storeCategories = categories.stream()
-                .map(category -> new StoreCategory(store, category)) // 필드명 변경에 맞게 수정
+                .map(category -> new StoreCategory(store, category))
                 .collect(Collectors.toList());
-        storeCategoryRepository.saveAll(storeCategories);
+
+        return storeCategoryRepository.saveAll(storeCategories);
     }
+
+
 
     // [조회] 모든 카테고리
     public List<CategoryResponseDto> getAllCategories() {
@@ -210,7 +225,6 @@ public class StoreService {
         Region savedRegion = regionRepository.save(region);
         return new RegionResponseDto(savedRegion);
     }
-
 
     // [수정] 점수
     @Transactional

@@ -62,14 +62,13 @@ public class StoreController {
     }
 
     // [POST] 가게 등록
-    @PreAuthorize("hasAnyAuthority('ROLE_MASTER', 'ROLE_ADMIN')")
     @PostMapping("/stores")
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestBody StoreRequestDto dto,
             @RequestHeader(name = "access") String token
     ) {
-        // 토큰에서 사용자 이름 추출
         String createdBy = jWTUtil.getUsername(token);
+
         return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, createdBy)));
     }
 
