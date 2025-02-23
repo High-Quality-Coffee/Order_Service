@@ -46,8 +46,8 @@ public class OrderService {
         String userName = jwtUtil.getUsername(token);
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
-//        Optional.ofNullable(storesClient.searchStore(createDto.getStoreId(), token))
-//                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
+        Optional.ofNullable(storesClient.searchStore(createDto.getStoreId().toString(), token))
+                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
 
         List<OrderProductRequest> orderProductRequests = createDto.getOrderProductRequests();
 
@@ -186,6 +186,9 @@ public class OrderService {
     public Page<OrderResponse> searchOrdersByStoreId(String storeId ,String token, int page, int limit, Boolean isAsc, String orderBy) {
 
         String userName = jwtUtil.getUsername(token);
+
+        Optional.ofNullable(storesClient.searchStore(storeId, token))
+                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
 

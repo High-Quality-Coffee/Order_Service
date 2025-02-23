@@ -2,6 +2,7 @@ package com.teamsparta14.order_service.order.repository;
 
 
 
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -101,9 +102,9 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
                 .map(param -> {
                     String property = param.getProperty();
                     return switch (property) {
-                        case "orderId" -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, myOrder.orderId);
-                        case "orderType" -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, myOrder.orderType);
-                        default -> new OrderSpecifier<>(com.querydsl.core.types.Order.DESC, myOrder.createdAt);
+                        case "orderId" -> new OrderSpecifier<>(Order.DESC, myOrder.orderId);
+                        case "orderType" -> new OrderSpecifier<>(Order.DESC, myOrder.orderType);
+                        default -> new OrderSpecifier<>(Order.DESC, myOrder.createdAt);
                     };
                 })
                 .toArray(OrderSpecifier[]::new);
