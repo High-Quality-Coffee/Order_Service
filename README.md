@@ -18,7 +18,7 @@ BE 배포 링크 : https://order-service.store
 <br/>
 <br/>
 
-# 2. Team Members (팀원 및 팀 소개)
+# 2. Team14 Members (팀원 및 팀 소개)
 | 박규원 | 조수빈 | 김소진 | 임규진 |
 |:------:|:------:|:------:|:------:|
 | <img src="https://avatars.githubusercontent.com/u/125748258?v=4" alt="박규원" width="150"> | <img src="https://avatars.githubusercontent.com/u/97503991?v=4" alt="조수빈" width="150"> | <img src="https://avatars.githubusercontent.com/u/170385509?v=4" alt="김소진" width="150"> | <img src="https://avatars.githubusercontent.com/u/113866973?v=4" alt="임규진" width="150"> |
@@ -80,7 +80,19 @@ BE 배포 링크 : https://order-service.store
 <br/>
 <br/>
 
-# 4. Tasks & Responsibilities (작업 및 역할 분담)
+# 4. ERD
+erdcloud : https://www.erdcloud.com/d/sT8WDsAXXqfbB9Gay
+<br/>
+<br/>
+<img src="https://github.com/user-attachments/assets/22d04d68-7885-4a56-b2ff-2aef93f95232" alt="erd">
+
+
+<br/>
+<br/>
+
+
+
+# 5. Tasks & Responsibilities (작업 및 역할 분담)
 |  |  |  |
 |-----------------|-----------------|-----------------|
 | 박규원    |  <img src="https://avatars.githubusercontent.com/u/125748258?v=4" alt="박규원" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>JWT 기반 회원 도메인 관리</li><li>배송지 관리</li><li>인프라 전담 관리</li></ul>     |
@@ -91,9 +103,9 @@ BE 배포 링크 : https://order-service.store
 <br/>
 <br/>
 
-# 5. Technology Stack (기술 스택)
+# 6. Technology Stack (기술 스택)
 
-## 5.1 BackEnd
+## 6.1 BackEnd
 |  |  |  |
 |-----------------|-----------------|-----------------|
 | SpringBoot    |  <img src="https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white" alt="SpringBoot" width="200"> | 3.4.3    |
@@ -104,7 +116,7 @@ BE 배포 링크 : https://order-service.store
 
 <br/>
 
-## 5.2 Infra
+## 6.2 Infra
 |  |  |  |
 |-----------------|-----------------|-----------------|
 | PostgreSQL  |  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white" alt="PostgreSQL" width="200">    | 16.3 |
@@ -168,6 +180,27 @@ snake_case
 <br/>
 
 # 9. 커밋 컨벤션
+참고 : https://hqc24.tistory.com/9
+<br/>
+<br/>
+```
+
+[feat]: 회원탈퇴 기능 수정
+
+[목적]: 기존 hard-delete 방식 대신, soft-delete 방식을 적용하여 기능 수정을 하기 위해서.  
+
+[목표]: soft-delete 방식으로 회원탈퇴를 구현하여, 유저가 물리적으로 삭제되는 것이 아닌,
+	   상태값으로 탈퇴여부를 관리하여, 유저 계정 복구에 대비.  
+
+[달성도]: 
+
+  - soft-delete 구현 완료.  
+
+  - 멤버 테이블에 탈퇴여부 상태값 추가 완료.  
+
+[기타]: DB 과부화를 방지하기 위해서, 탈퇴 회원은 30일 이후 자동 삭제되도록 처리할 필요가 있음.
+
+```
 
 
 <br/>
