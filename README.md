@@ -1,10 +1,11 @@
-<img src="" alt="배너" width="100%"/>
+<img src="https://github.com/user-attachments/assets/c3491418-e133-41c7-8f85-97dd70589fb4" alt="서비스 소개" width="100%"/>
+
 
 <br/>
 <br/>
 
 # 0. Getting Started (서비스 구성 및 실행 방법)
-https://order-service.store
+BE 배포 링크 : https://order-service.store
 
 <br/>
 <br/>
@@ -29,24 +30,51 @@ https://order-service.store
 
 # 3. Key Features (주요 기능)
 - **권한별 회원 관리**:
-  - 회원가입 시 DB에 유저정보가 등록됩니다.
+  - 권한별 회원가입을 진행합니다
+  - 권한은 USER(고객), MASTER(관리자), OWNER(가게주인), MANAGER(가게매니저)로 분류되어 있습니다
+  - 로그인이 진행되고, 필터 단에서 유저의 권한을 확인하여 토큰을 발급합니다.
+  - 발급된 토큰을 기반으로 권한별 API를 처리합니다.
+  - Security Config에서 권한을 처리합니다.
 
 - **배송지**:
-  - 사용자 인증 정보를 통해 로그인합니다.
+  - 고객별 배송지를 등록,조회,수정,삭제할 수 있습니다.
+  - 배송지별 요청사항을 따로 관리하여 배달 주문시 요청사항을 작성하고, 조회할 수 있습니다.
 
 - **주문**:
-  - 캘린더 UI를 통해 동아리 관련 일정 추가&삭제가 가능합니다.
-  - 체크박스를 통해 종료되거나 이미 수행한 일정을 표시할 수 있습니다.
-
+  - 주문 취소: 주문 생성 후 5분 이내에만 취소 가능하도록 제한합니다
+  - 주문 유형: 온라인 주문과 대면 주문(가게에서 직접 주문) 모두 지원합니다.
+  - 대면 주문 처리: 가게 사장님이 직접 대면 주문을 접수합니다.
+  
 - **결제**:
-  - 대학 내 동아리를 검색할 수 있습니다.
-  - 검색 시 해당 동아리가 업로드한 홍보글이 보여집니다.
+  - 결제 방식: 카드 결제만 가능하도록 구현합니다
+  - PG사 연동: PG사와의 결제 연동은 외주 개발로 진행하며, 결제 관련 내역만 플랫폼의 데이터베이스에 저장합니다.
+  - 결제 테이블: 결제 내역을 저장하기 위한 전용 테이블 설계하여 관리합니다.
 
 - **상품**:
-  - 홍보글 등록을 통해 동아리를 홍보할 수 있습니다.
+  - 상품은 가게별로 정해진 형식을 따라 등록할 수 있도록 구현합니다.
+  - 주문한 아이템 테이블을 따로 생성하여 주문내역을 관리합니다.
+  - 상품테이블의 정보를 기반으로 주문이 들어오면 주문한 아이템 테이블을 생성합니다.
 
 - **리뷰**:
-  - 새로운 동아리를 만들어 관리할 수 있습니다.
+  - 주문한 내역에 대해서만 리뷰가 가능합니다.
+  - 리뷰를 등록하면 별점과 리뷰내역이 리뷰테이블에 저장됩니다.
+  - 리뷰가 업데이트 되면, 해당 업체의 총 리뷰 개수는 1이 증가되며, 리뷰 평점이 자동으로 계산됩니다.
+  - 해당 업체의 모든 리뷰를 불러와서 리뷰를 새로 계산하는 것이 아닌, 이미 계산된 평점에서 새로운 리뷰 1개를 불러와서 평균 리뷰점수를 업데이트 합니다.
+ 
+- **업체**:
+  - 한식, 중식, 분식, 치킨, 피자 카테고리로 분류하였습니다.
+  - 추후에 음식점 카테고리를 추가하거나 수정할 수 있도록 하였습니다.
+  - 초기에는 광화문 근처로 한정하여 운영하며, 향후 확장을 고려한 지역 분류 시스템을 설계하였습니다.
+  - 지역별 필터링, 지역정보 수정 및 추가 등이 가능 하도록 했습니다
+ 
+- **AI API 연동**
+  - **상품 설명 자동 생성:** AI API를 연동하여 가게 사장님이 상품 설명을 쉽게 작성할 수 있도록 지원하였습니다.
+  - **AI 요청 기록:** AI API 요청 질문과 대답은 모두 데이터베이스에 저장하였습니다.
+ 
+- **데이터 보존 및 삭제 처리**
+  - **데이터 보존:** 모든 데이터는 완전 삭제되지 않고 숨김 처리로 관리하였습니다.
+  - **상품 숨김:** 개별 상품도 숨김 처리 가능하도록 구현(숨김과 삭제는 다른 기능)하였습니다
+  - **데이터 감사 로그:** 모든 정보에 생성일, 생성 아이디, 수정일, 수정 아이디, 삭제일, 삭제 아이디를 포함하였습니다.
 
 
 <br/>
@@ -56,38 +84,35 @@ https://order-service.store
 |  |  |  |
 |-----------------|-----------------|-----------------|
 | 박규원    |  <img src="https://avatars.githubusercontent.com/u/125748258?v=4" alt="박규원" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>JWT 기반 회원 도메인 관리</li><li>배송지 관리</li><li>인프라 전담 관리</li></ul>     |
-| 조수빈   |  <img src="https://avatars.githubusercontent.com/u/97503991?v=4" alt="조수빈" width="100">| <ul><li>메인 페이지 개발</li><li>동아리 만들기 페이지 개발</li><li>커스텀훅 개발</li></ul> |
-| 김소진   |  <img src="https://avatars.githubusercontent.com/u/170385509?v=4" alt="김소진" width="100">    |<ul><li>홈 페이지 개발</li><li>로그인 페이지 개발</li><li>동아리 찾기 페이지 개발</li><li>동아리 프로필 페이지 개발</li><li>커스텀훅 개발</li></ul>  |
-| 임규진    |  <img src="https://avatars.githubusercontent.com/u/113866973?v=4" alt="임규진" width="100">    | <ul><li>회원가입 페이지 개발</li><li>마이 프로필 페이지 개발</li><li>커스텀훅 개발</li></ul>    |
+| 조수빈   |  <img src="https://avatars.githubusercontent.com/u/97503991?v=4" alt="조수빈" width="100">| <ul><li>상품 서비스 개발</li><li>리뷰 서비스 개발</li><li>주문, 업체 서비스와의 통신을 위한 RestTemplate 구축</li></ul> |
+| 김소진   |  <img src="https://avatars.githubusercontent.com/u/170385509?v=4" alt="김소진" width="100">|  <ul><li>업체 서비스 개발</li><li>카테고리별 업체 관리</li><li>지역별 업체 관리</li> |
+| 임규진    |  <img src="https://avatars.githubusercontent.com/u/113866973?v=4" alt="임규진" width="100">| <ul><li>주문 서비스 개발</li><li>결제 서비스 개발</li><li>AI 상품 설명 기능 개발</li></ul>  |
 
 <br/>
 <br/>
 
 # 5. Technology Stack (기술 스택)
 
-## 5.2 BackEnd
+## 5.1 BackEnd
 |  |  |  |
 |-----------------|-----------------|-----------------|
-| React    |  <img src="https://github.com/user-attachments/assets/e3b49dbb-981b-4804-acf9-012c854a2fd2" alt="React" width="100"> | 18.3.1    |
-| StyledComponents    |  <img src="https://github.com/user-attachments/assets/c9b26078-5d79-40cc-b120-69d9b3882786" alt="StyledComponents" width="100">| 6.1.12   |
-| MaterialUI    |  <img src="https://github.com/user-attachments/assets/75a46fa7-ebc0-4a9d-b648-c589f87c4b55" alt="MUI" width="100">    | 5.0.0  |
-| DayJs    |  <img src="https://github.com/user-attachments/assets/3632d7d6-8d43-4dd5-ba7a-501a2bc3a3e4" alt="DayJs" width="100">    | 1.11.12    |
+| SpringBoot    |  <img src="https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white" alt="SpringBoot" width="200"> | 3.4.3    |
+| Java    |  <img src="https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=Java&logoColor=white" alt="Java" width="200" > | 17 |
+| Spring Data JPA    |  <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=for-the-badge&logo=SpringDataJPA&logoColor=white" alt="JPA" width="200" >    | 5.0.0  |
+| QueryDSL    |  <img src="https://img.shields.io/badge/QueryDSL-0769AD?style=for-the-badge&logo=QueryDSL&logoColor=white" alt="QueryDSL" alt="QueryDSL" width="200" >    | 1.11.12    |
+| Spring Security |  <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white" alt="QueryDSL" alt="QueryDSL" width="200">    | 3.4.2    |
 
 <br/>
 
-## 5.3 Infra
+## 5.2 Infra
 |  |  |  |
 |-----------------|-----------------|-----------------|
-| Firebase    |  <img src="https://github.com/user-attachments/assets/1694e458-9bb0-4a0b-8fe6-8efc6e675fa1" alt="Firebase" width="100">    | 10.12.5    |
-
-<br/>
-
-## 5.4 Version & Communication
-|  |  |
-|-----------------|-----------------|
-| Git    |  <img src="https://github.com/user-attachments/assets/483abc38-ed4d-487c-b43a-3963b33430e6" alt="git" width="100">    |
-| Git Kraken    |  <img src="https://github.com/user-attachments/assets/32c615cb-7bc0-45cd-91ea-0d1450bfc8a9" alt="git kraken" width="100">    |
-| Notion    |  <img src="https://github.com/user-attachments/assets/34141eb9-deca-416a-a83f-ff9543cc2f9a" alt="Notion" width="100">    |
+| PostgreSQL  |  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=PostgreSQL&logoColor=white" alt="PostgreSQL" width="200">    | 16.3 |
+| pgAdmin    |  <img src="https://img.shields.io/badge/pgAdmin-4169E1?style=for-the-badge&logo=pgAdmin&logoColor=white" alt="pgAdmin" width="200">    | latest  |
+| AWS ec2    |  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white" alt="ec2" width="200">    | |
+| AWS RDS    |  <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white" alt="rds" width="200">    | |
+| Nginx Proxy Manager |  <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=for-the-badge&logo=NginxProxyManager&logoColor=white" alt="Firebase" width="200">    | latest |
+| Docker  |  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white" alt="docker" width="200">    |  |
 
 <br/>
 <br/>
