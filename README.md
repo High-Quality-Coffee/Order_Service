@@ -10,10 +10,15 @@ BE 배포 링크 : https://order-service.store
 <br/>
 <br/>
 
-# 1. About Project (프로젝트 설명)
+# 1. About Project
 - 프로젝트 목적: 음식 주문 관리 서비스 개발
 - 프로젝트 설명: 기존에는 음식점에서 전화로 주문을 받고 종이에 직접 기록하는 방식이 많았지만 이제는 대부분의 주문이 온라인으로 이루어지고 있습니다.
 이를 반영하여, 효율적인 주문 관리와 처리를 위한 웹 서비스를 구현하려고 했습니다!!
+
+프로젝트 아키텍처
+<br/>
+<img src="https://github.com/user-attachments/assets/87fa39f2-bcb3-4e73-94f1-082e49300ea3" alt="project-architecture">
+
 
 <br/>
 <br/>
