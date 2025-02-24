@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -77,6 +78,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/join/**", "/api/auth/login","/swagger-ui/**","/swagger-resources/**","/v3/api-docs/**").permitAll()  // 회원가입은 인증 없이 가능
                         .requestMatchers("/api/address/**", "/api/auth/delete").hasRole("USER")
                         .requestMatchers("/api/user/list/{username}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.GET,"/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/products/search").permitAll()
+                        .requestMatchers("/api/products/**").hasAnyRole("OWNER","MASTER")
+                        .requestMatchers(HttpMethod.GET,"/api/reviews/**").permitAll()
+                        .requestMatchers("/api/revies/**").hasRole("USER")
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
 //                        .anyRequest().permitAll()  // 그 외 모든 요청은 인증 필요
                 )
