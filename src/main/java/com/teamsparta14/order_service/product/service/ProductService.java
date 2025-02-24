@@ -1,6 +1,5 @@
 package com.teamsparta14.order_service.product.service;
 
-import com.teamsparta14.order_service.global.response.ProductClientResponse;
 import com.teamsparta14.order_service.order.repository.StoresClient;
 import com.teamsparta14.order_service.product.dto.ProductRequestDto;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
@@ -11,6 +10,7 @@ import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.product.repository.DescriptionRepository;
 import com.teamsparta14.order_service.product.repository.ProductRepository;
+import com.teamsparta14.order_service.store.dto.StoreResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -58,11 +58,11 @@ public class ProductService {
 
         //dto 내부 storeId를 통해 store가 존재하는지 확인
         UUID storeId = requestDto.getStoreId();
-        /*Object store = storesClient.searchStore(storeId,token);
+        Object store = storesClient.searchStore(String.valueOf(storeId),token);
 
         if(null == store){
             throw new IllegalArgumentException("store Not found");
-        }*/
+        }
 
         //Ai 상품 설명
         AIDescription aiDescription = new AIDescription();
@@ -186,18 +186,16 @@ public class ProductService {
 
     //store, product 공통 검증 로직
     private void validateStoreAndProduct(String token, UUID storeId, UUID productId) {
-        /*ProductClientResponse store = (ProductClientResponse) storesClient.searchStore(storeId,token);
+        StoreResponseDto store = storesClient.searchStore(String.valueOf(storeId),token);
 
-        if(null == store || store.getData().isEmpty()){
+        if(null == store){
             throw new IllegalArgumentException("해당 가게를 찾을 수 없습니다.");
         }
 
         //storeId에 등록된 상품인지 체크
-        boolean productExists = store.getData().stream()
-                .anyMatch(product -> product.getProductId().equals(productId));
-
+        boolean productExists = productRepository.existsByStoreIdAndProductId(store.getId(), productId);
         if (!productExists) {
             throw new AccessDeniedException("해당 가게에 속한 상품이 아닙니다.");
-        }*/
+        }
     }
 }
