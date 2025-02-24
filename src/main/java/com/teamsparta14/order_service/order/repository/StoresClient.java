@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamsparta14.order_service.global.response.StoreClientResponse;
 import com.teamsparta14.order_service.store.dto.StoreResponseDto;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,9 +19,7 @@ import java.net.URI;
 @Repository
 public class StoresClient {
 
-
-    @Value("${project.server.url}")
-    private String SERVER_URL;
+    private final String SERVER_URL = "http://localhost:8080";
 
     public StoreResponseDto searchStore(String storeId, String token) {
 

@@ -1,11 +1,13 @@
 package com.teamsparta14.order_service.review.service;
 
-import com.teamsparta14.order_service.global.response.ProductClientResponse;
+import com.teamsparta14.order_service.order.dto.OrderResponse;
+import com.teamsparta14.order_service.order.repository.StoresClient;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.review.dto.RatingDto;
 import com.teamsparta14.order_service.review.dto.ReviewRequestDto;
 import com.teamsparta14.order_service.review.dto.ReviewResponseDto;
 import com.teamsparta14.order_service.review.entity.Review;
+import com.teamsparta14.order_service.review.repository.OrderClient;
 import com.teamsparta14.order_service.review.repository.ReviewRepository;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,7 +34,10 @@ import java.util.*;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
+    private final RestClient restClient;
     private final JWTUtil jwtUtil;
+    private final StoresClient storesClient;
+    private final OrderClient orderClient;
 
     //리뷰 전체 조회
     public List<ReviewResponseDto> getReviews(UUID storeId, Pageable pageable, SortBy sortBy) {
@@ -61,7 +66,14 @@ public class ReviewService {
     public ReviewResponseDto createReview(ReviewRequestDto requestDto, String token) {
 
         String userName = jwtUtil.getUsername(token);
-        
+
+        //dto 내부 storeId를 통해 store가 존재하는지 확인 구현 예정
+        Optional.ofNullable(storesClient.searchStore(requestDto.getStoreId().toString(), token))
+                .orElseThrow(() -> new IllegalArgumentException("store Not found"));
+
+        OrderResponse orderResponse = orderClient.searchOrderList(requestDto.getOrderId(), token);
+
+
         //작성한 리뷰가 있는지 확인
         if (reviewRepository.existsByStoreIdAndUserName(requestDto.getStoreId(), userName)) {
             throw new IllegalArgumentException("이미 작성한 리뷰가 있습니다.");
@@ -81,7 +93,6 @@ public class ReviewService {
                 .toUri();
 
 
-
         Map<String, Integer> requestBody = new HashMap<>();
         requestBody.put("star",requestDto.getStar().getValue());
 
@@ -97,7 +108,6 @@ public class ReviewService {
         if(!response.getStatusCode().is2xxSuccessful()){
             throw new IllegalArgumentException("can not update store rating");
         }
-
 
         return ReviewResponseDto.of(review);
     }
