@@ -34,7 +34,7 @@ public class ProductController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "LATEST") SortBy sortBy,
-            @RequestParam(value = "status", required = false) ProductStatus status
+            @RequestParam(value = "status", defaultValue = "ON_SALE") ProductStatus status
     ){
         Pageable pageable = PageRequest.of(page, size);
         List<ProductResponseDto> products = productService.getProducts(storeId, pageable, sortBy, status);

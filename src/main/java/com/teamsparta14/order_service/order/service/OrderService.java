@@ -1,10 +1,7 @@
 package com.teamsparta14.order_service.order.service;
 
 
-import com.teamsparta14.order_service.order.dto.OrderCreateDto;
-import com.teamsparta14.order_service.order.dto.OrderProductRequest;
-import com.teamsparta14.order_service.order.dto.OrderResponse;
-import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
+import com.teamsparta14.order_service.order.dto.*;
 import com.teamsparta14.order_service.order.entity.MyOrder;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
@@ -74,31 +71,34 @@ public class OrderService {
     private void requestCompareToClientProductList(List<OrderProductRequest> orderProductRequests,
                                                    List<ProductResponseDto> productResponses) {
 
-        //Map에 요청한 물품에 따라 key : productId,value : Product를 넣음
-        Map<UUID, OrderProductRequest> productMap = orderProductRequests
-                .stream()
-                .collect(toMap(OrderProductRequest::getProductId, Function.identity()));
-        // 두개의 객체를 비교
+        Map<UUID, OrderProductRequest> productMap = orderProductRequests.stream()
+                .collect(Collectors.toMap(
+                        OrderProductRequest::getProductId,
+                        Function.identity(),
+                        (existing, replacement) -> replacement // 중복 키 처리
+                ));
+
         for (ProductResponseDto product : productResponses) {
-            if (!compareOrderProductToClientProduct(productMap.get(product.getProductId()), product)) {
-                throw new IllegalArgumentException("Not enough product in stock");
+            OrderProductRequest request = productMap.get(product.getProductId());
+            if (request == null || !compareOrderProductToClientProduct(request, product)) {
+                throw new IllegalArgumentException("Not enough product in stock or product not found: " + product.getProductId());
             }
             productMap.remove(product.getProductId());
         }
 
         if (!productMap.isEmpty()) {
-            throw new IllegalArgumentException("product not found");
+            StringBuilder missingProducts = new StringBuilder();
+            productMap.keySet().forEach(productId -> missingProducts.append(productId).append(", "));
+            throw new IllegalArgumentException("Products not found: " + missingProducts.toString());
         }
-
     }
 
-    //수량이 적으면 안됨 가격이 틀리면 안됨
-    private boolean compareOrderProductToClientProduct(OrderProductRequest orderProduct,
-                                                       ProductResponseDto clientProduct) {
+    private boolean compareOrderProductToClientProduct(OrderProductRequest request, ProductResponseDto response) {
 
-        if (orderProduct.getQuantity() > clientProduct.getProductQuantity()) return false;
-
-        return orderProduct.getPrice().equals(clientProduct.getProductPrice());
+        if (request == null || response == null) {
+            return false;
+        }
+        return request.getQuantity() <= response.getProductQuantity();
     }
 
     @Transactional
@@ -196,5 +196,17 @@ public class OrderService {
 
         return orderRepository.searchByStoreId(userName, pageable,storeId).map(OrderResponse::from);
 
+    }
+
+    public List<OrderResponse> searchProduct(OrderSearchDto requestDto) {
+
+        List<MyOrder> orderList = orderRepository.searchOrderByIdList(requestDto);
+        List<OrderResponse> responseList = new ArrayList<>();
+
+        for (MyOrder order : orderList) {
+            responseList.add(OrderResponse.from(order));
+        }
+
+        return responseList;
     }
 }

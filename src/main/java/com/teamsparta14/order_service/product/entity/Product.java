@@ -52,12 +52,13 @@ public class Product extends BaseEntity {
     @Column(length = 100)
     private String productDescription;
 
-    public Product(ProductRequestDto requestDto, UUID storeId , String productDescription) {
+    public Product(ProductRequestDto requestDto, UUID storeId, String productDescription) {
         this.storeId = storeId;
         this.productName = requestDto.getProductName();
         this.productPrice = requestDto.getProductPrice();
         this.productQuantity = requestDto.getProductQuantity();
         this.isDeleted = false;
+        this.status = ProductStatus.ON_SALE;
         this.productDescription = productDescription;
     }
 
