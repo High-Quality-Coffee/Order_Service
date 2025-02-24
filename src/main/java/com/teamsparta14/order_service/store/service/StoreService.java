@@ -63,9 +63,15 @@ public class StoreService {
     public StoreResponseDto createStore(StoreRequestDto dto, String token) {
 
         String createdBy = jwtUtil.getUsername(token);
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole) && !"ROLE_OWNER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
 
         Region region = regionRepository.findByRegionName(dto.getRegionName())
                 .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
+
 
         Store store = Store.builder()
                 .storeName(dto.getStoreName())
