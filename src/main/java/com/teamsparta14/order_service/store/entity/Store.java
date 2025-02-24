@@ -47,8 +47,6 @@ public class Store extends BaseEntity {
 
     private int totalReviewCount = 0;
 
-//    private double totalReviewScore = 0;
-
     private double averageRating = 0;
 
     // 삭제

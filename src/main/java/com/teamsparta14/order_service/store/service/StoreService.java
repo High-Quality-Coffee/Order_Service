@@ -49,14 +49,20 @@ public class StoreService {
     }
 
     // [조회] 특정 가게
-    public Store getStoreById(UUID storeId) {
+    public Store getStoreById(UUID storeId, String token) {
+
+        String userName = jwtUtil.getUsername(token);
+
         return storeRepository.findById(storeId)
+                .filter(store -> !store.isDeleted()) // 삭제된 가게 필터링
                 .orElseThrow(() -> new NotFoundException("해당 가게를 찾을 수 없습니다."));
     }
 
     // [등록] 가게
     @Transactional
-    public StoreResponseDto createStore(StoreRequestDto dto, String createdby) {
+    public StoreResponseDto createStore(StoreRequestDto dto, String token) {
+
+        String createdBy = jwtUtil.getUsername(token);
 
         Region region = regionRepository.findByRegionName(dto.getRegionName())
                 .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다: " + dto.getRegionName()));
@@ -70,7 +76,7 @@ public class StoreService {
                 .region(region)
                 .build();
 
-        store.setCreatedBy(createdby);
+        store.setCreatedBy(createdBy);
         Store savedStore = storeRepository.save(store);
 
         if (dto.getCategories() == null || dto.getCategories().isEmpty()) {
@@ -87,9 +93,23 @@ public class StoreService {
 
     // [수정] 가게
     @Transactional
-    public StoreResponseDto updateStore(UUID storeId, StoreUpdateRequestDto requestDto) {
+    public StoreResponseDto updateStore(UUID storeId, StoreUpdateRequestDto requestDto, String token) {
+
+        String userName = jwtUtil.getUsername(token);
+        String userRole = jwtUtil.getRole(token);
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new NotFoundException("해당 가게를 찾을 수 없습니다."));
+
+        // OWNER는 본인 가게만 삭제 가능
+        if ("ROLE_OWNER".equals(userRole)) {
+            if (store.getCreatedBy() == null || !store.getCreatedBy().equals(userName)) {
+                throw new IllegalArgumentException("본인의 가게만 삭제할 수 있습니다.");
+            }
+        }
+
+        if ("ROLE_USER".equals(userRole) ) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
 
         store.update(requestDto);
         storeRepository.save(store);
@@ -99,16 +119,30 @@ public class StoreService {
 
     // [삭제] 가게
     @Transactional
-    public String deleteStore(UUID storeId, String deletedBy) {
+    public String deleteStore(UUID storeId, String token) {
+        String userName = jwtUtil.getUsername(token);
+        String userRole = jwtUtil.getRole(token);
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("해당 가게를 찾을 수 없습니다."));
 
+        // OWNER는 본인 가게만 삭제 가능
+        if ("ROLE_OWNER".equals(userRole)) {
+            if (store.getCreatedBy() == null || !store.getCreatedBy().equals(userName)) {
+                throw new IllegalArgumentException("본인의 가게만 삭제할 수 있습니다.");
+            }
+        }
+
+        if ("ROLE_USER".equals(userRole) ) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
+
         store.setDeleted(true);
-        store.setDeletedBy(deletedBy);
+        store.setDeletedBy(userName);
         storeRepository.save(store);
 
         return "가게 ID " + storeId + "가 성공적으로 삭제되었습니다.";
     }
+
 
     // [조회] 카테고리
     private List<String> getCategoryNames(UUID storeId) {
@@ -153,11 +187,17 @@ public class StoreService {
 
     // [등록] 카테고리
     @Transactional
-    public CategoryResponseDto createCategory(CategoryRequestDto dto, String role) {
+    public CategoryResponseDto createCategory(CategoryRequestDto dto, String token) {
 
         boolean exists = categoryRepository.existsByCategoryName(dto.getCategoryName());
         if (exists) {
             throw new IllegalArgumentException("이미 존재하는 카테고리입니다.");
+        }
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
         }
 
         Category category = Category.builder()
@@ -170,10 +210,16 @@ public class StoreService {
 
     // [수정] 카테고리
     @Transactional
-    public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto, String role) {
+    public CategoryResponseDto updateCategory(UUID categoryId, CategoryRequestDto dto, String token) {
 
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다."));
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
 
         category.setCategoryName(dto.getCategoryName());
         return new CategoryResponseDto(categoryRepository.save(category));
@@ -181,23 +227,49 @@ public class StoreService {
 
     // [삭제] 카테고리
     @Transactional
-    public String deleteCategory(UUID categoryId, String role) {
+    public String deleteCategory(UUID categoryId, String token) {
 
         if (!categoryRepository.existsById(categoryId)) {
             throw new IllegalArgumentException("해당 카테고리를 찾을 수 없습니다.");
+        }
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
         }
 
         categoryRepository.deleteById(categoryId);
         return "카테고리 ID " + categoryId + "가 성공적으로 삭제되었습니다.";
     }
 
+    // [조회] 모든 지역
+    public List<RegionResponseDto> getAllRegions() {
+        return regionRepository.findAll().stream()
+                .map(RegionResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    // [조회] 특정 지역
+    public RegionResponseDto getRegionById(UUID regionId) {
+        Region region = regionRepository.findById(regionId)
+                .orElseThrow(() -> new RuntimeException("해당 지역을 찾을 수 없습니다."));
+        return new RegionResponseDto(region);
+    }
+
     // [등록] 지역
     @Transactional
-    public RegionResponseDto createRegion(RegionRequestDto dto, String role) {
+    public RegionResponseDto createRegion(RegionRequestDto dto, String token) {
 
         boolean exists = regionRepository.existsByRegionName(dto.getRegionName());
         if (exists) {
             throw new IllegalArgumentException("이미 존재하는 지역입니다.");
+        }
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
         }
 
         Region region = Region.builder()
@@ -208,11 +280,65 @@ public class StoreService {
         return new RegionResponseDto(savedRegion);
     }
 
+    // [수정] 지역
+    @Transactional
+    public RegionResponseDto updateRegion(UUID regionId, RegionRequestDto dto, String token) {
+
+        String userRole = jwtUtil.getRole(token);
+
+        Region region = regionRepository.findById(regionId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
+
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
+
+        region.setRegionName(dto.getRegionName());
+        regionRepository.save(region);
+        return new RegionResponseDto(region);
+    }
+
+
+    // [삭제] 지역
+    @Transactional
+    public String deleteRegion(UUID regionId, String token) {
+
+        if (!regionRepository.existsById(regionId)) {
+            throw new IllegalArgumentException("해당 지역을 찾을 수 없습니다.");
+        }
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
+
+        regionRepository.deleteById(regionId);
+        return "지역 ID " + regionId + "가 성공적으로 삭제되었습니다.";
+    }
+
     // [수정] 점수
     @Transactional
-    public void updateStoreRating(UUID storeId, int newTotalReviewCount, double newAverageRating) {
-        Store store = getStoreById(storeId);
-        store.updateRating(newTotalReviewCount, newAverageRating);
+    public void addStoreRating(UUID storeId, int newStar, String token) {
+
+        String userRole = jwtUtil.getRole(token);
+
+        if (!"ROLE_USER".equals(userRole)) {
+            throw new IllegalArgumentException("접근 권한이 없습니다. 현재 역할: " + userRole);
+        }
+
+        Store store = getStoreById(storeId, token);
+
+        // 기존 리뷰 개수, 평균 평점
+        int totalReviewCount = store.getTotalReviewCount();
+        double averageRating = store.getAverageRating();
+
+        // 계산
+        int updatedTotalReviewCount = totalReviewCount + 1;
+        double updatedAverageRating = ((averageRating * totalReviewCount) + newStar) / updatedTotalReviewCount;
+
+        store.updateRating(updatedTotalReviewCount, updatedAverageRating);
         storeRepository.save(store);
     }
 

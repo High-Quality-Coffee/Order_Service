@@ -2,6 +2,7 @@ package com.teamsparta14.order_service.store.controller;
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.product.entity.ProductStatus;
+import com.teamsparta14.order_service.review.dto.RatingDto;
 import com.teamsparta14.order_service.store.dto.*;
 import com.teamsparta14.order_service.store.entity.SortBy;
 import com.teamsparta14.order_service.store.entity.Store;
@@ -34,7 +35,7 @@ import java.util.UUID;
 public class StoreController {
 
     private final StoreService storeService;
-    private final JWTUtil jWTUtil;
+
 
     // [GET] 전체 가게 조회
     @GetMapping("/stores")
@@ -55,9 +56,10 @@ public class StoreController {
     }
 
     // [GET] 특정 가게 조회
+
     @GetMapping("/stores/{storeId}")
-    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable UUID storeId) {
-        Store store = storeService.getStoreById(storeId);
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable UUID storeId,@RequestHeader("access") String token) {
+        Store store = storeService.getStoreById(storeId , token);
         StoreResponseDto storeResponseDto =  new StoreResponseDto(store);
         return ResponseEntity.ok(ApiResponse.success(storeResponseDto));
     }
@@ -68,54 +70,33 @@ public class StoreController {
             @RequestBody StoreRequestDto dto,
             @RequestHeader(name = "access") String token
     ) {
-        String createdBy = jWTUtil.getUsername(token);
+        //when then given
 
-        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, createdBy)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.createStore(dto, token)));
     }
 
     // [PUT] 가게 정보 수정
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
     @PutMapping("/stores/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> updateStore(
             @PathVariable UUID storeId,
             @RequestBody StoreUpdateRequestDto requestDto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader(name  = "access") String token
     ) {
-        Store store = storeService.getStoreById(storeId);
-        String currentUsername = customUserDetails.getUsername();
 
-        boolean isAdmin = customUserDetails.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ADMIN"));
-
-        if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
-            throw new RuntimeException("본인이 소유한 가게만 수정할 수 있습니다.");
-        }
 
         return ResponseEntity.ok(ApiResponse.success(
-                storeService.updateStore(storeId, requestDto)
+                storeService.updateStore(storeId, requestDto, token)
         ));
     }
 
     // [DELETE] 가게 삭제
-    @PreAuthorize("hasAnyAuthority('ROLE_OWNER', 'ROLE_ADMIN')")
     @DeleteMapping("stores/{storeId}")
     public ResponseEntity<ApiResponse<String>> deleteStore(
             @PathVariable("storeId") UUID storeId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader(name  = "access") String token
     ) {
-        String currentUsername = customUserDetails.getUsername();
 
-        boolean isAdmin = customUserDetails.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
-
-        Store store = storeService.getStoreById(storeId);
-
-        if (!isAdmin && !store.getCreatedBy().equals(currentUsername)) {
-            throw new RuntimeException("본인이 소유한 가게만 삭제할 수 있습니다.");
-        }
-
-        String deleteMessage = storeService.deleteStore(storeId, currentUsername);
-        return ResponseEntity.ok(ApiResponse.success(deleteMessage));
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteStore(storeId, token)));
     }
 
     // [조회] 모든 카테고리
@@ -136,13 +117,7 @@ public class StoreController {
             @RequestBody CategoryRequestDto requestDto,
             @RequestHeader(name = "access") String token
     ) {
-        String role = jWTUtil.getRole(token);
-
-        if (!"ROLE_MASTER".equals(role)) {
-            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
-        }
-
-        return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto, role)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.createCategory(requestDto, token)));
     }
 
     // [수정] 카테고리
@@ -152,12 +127,8 @@ public class StoreController {
             @RequestBody CategoryRequestDto requestDto,
             @RequestHeader(name = "access") String token
     ) {
-        String role = jWTUtil.getRole(token);
-        if (!"ROLE_MASTER".equals(role)) {
-            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
-        }
 
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateCategory(categoryId, requestDto, role)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateCategory(categoryId, requestDto, token)));
     }
 
     // [삭제] 카테고리
@@ -166,12 +137,20 @@ public class StoreController {
             @PathVariable UUID categoryId,
             @RequestHeader(name = "access") String token
     ) {
-        String role = jWTUtil.getRole(token);
-        if (!"ROLE_MASTER".equals(role)) {
-            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
-        }
 
-        return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId, role)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteCategory(categoryId, token)));
+    }
+
+    // [조회] 모든 지역
+    @GetMapping("/regions")
+    public ResponseEntity<ApiResponse<List<RegionResponseDto>>> getAllRegions() {
+        return ResponseEntity.ok(ApiResponse.success(storeService.getAllRegions()));
+    }
+
+    // [조회] 특정 지역
+    @GetMapping("/regions/{regionId}")
+    public ResponseEntity<ApiResponse<RegionResponseDto>> getRegionById(@PathVariable UUID regionId) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.getRegionById(regionId)));
     }
 
     // [등록] 지역
@@ -180,19 +159,39 @@ public class StoreController {
             @RequestBody RegionRequestDto requestDto,
             @RequestHeader(name = "access") String token
     ) {
-        String role = jWTUtil.getRole(token);
 
-        if (!"ROLE_MASTER".equals(role)) {
-            throw new AccessDeniedException("ROLE_MASTER 권한이 필요합니다.");
-        }
-
-        return ResponseEntity.ok(ApiResponse.success(storeService.createRegion(requestDto, role)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.createRegion(requestDto, token)));
     }
 
+    // [수정] 지역
+    @PutMapping("/regions/{regionId}")
+    public ResponseEntity<ApiResponse<RegionResponseDto>> updateRegion(
+            @PathVariable UUID regionId,
+            @RequestBody RegionRequestDto requestDto,
+            @RequestHeader(name = "access") String token
+    ) {
+
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateRegion(regionId, requestDto, token)));
+    }
+
+    // [삭제] 지역
+    @DeleteMapping("/regions/{regionId}")
+    public ResponseEntity<ApiResponse<String>> deleteRegion(
+            @PathVariable UUID regionId,
+            @RequestHeader(name = "access") String token
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(storeService.deleteRegion(regionId, token)));
+    }
+
+
     // [수정] 리뷰 점수
-//    @PostMapping("/{storeId}/rating")
-//    public ResponseEntity<String> updateStoreRating(@PathVariable UUID storeId, @RequestBody RatingUpdateDto ratingUpdateDto) {
-//        storeService.updateStoreRating(storeId, ratingUpdateDto.getTotalReviewCount(), ratingUpdateDto.getAverageRating());
-//        return ResponseEntity.ok("업체 평점이 업데이트되었습니다.");
-//    }
+    @PostMapping("/stores/{storeId}/rating")
+    public ResponseEntity<String> addStoreRating(
+            @PathVariable(name = "storeId") UUID storeId,
+            @RequestBody RatingDto ratingDto,
+            @RequestHeader("access") String token
+    ) {
+        storeService.addStoreRating(storeId, ratingDto.getStar(), token);
+        return ResponseEntity.ok("업체 평점이 업데이트되었습니다.");
+    }
 }

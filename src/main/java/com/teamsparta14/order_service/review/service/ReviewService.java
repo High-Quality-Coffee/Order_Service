@@ -1,5 +1,6 @@
 package com.teamsparta14.order_service.review.service;
 
+import com.teamsparta14.order_service.global.response.ProductClientResponse;
 import com.teamsparta14.order_service.product.entity.SortBy;
 import com.teamsparta14.order_service.review.dto.RatingDto;
 import com.teamsparta14.order_service.review.dto.ReviewRequestDto;
@@ -10,19 +11,20 @@ import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,7 +32,6 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final RestClient restClient;
     private final JWTUtil jwtUtil;
 
     //리뷰 전체 조회
@@ -74,23 +75,29 @@ public class ReviewService {
         //storeId와 별점을 전달할 URL
         URI uri = UriComponentsBuilder
                 .fromUriString("http://localhost:8080")
-                .path("/api/stores/" + review.getStoreId() + "/rating")
+                .path("/api/stores/" + requestDto.getStoreId() + "/rating")
                 .encode()
                 .build()
                 .toUri();
 
-        /*Consumer<HttpHeaders> headers = httpHeaders -> {
-        };*/
 
-        ResponseEntity<String> requestEntity =
-                restClient
-                        .method(HttpMethod.POST)
-                        .uri(uri)
-                        //.headers(headers)
-                        .body(ratingDto)
-                        .retrieve()
-                        .toEntity(String.class);
-        System.out.println(ratingDto.getStar());
+
+        Map<String, Integer> requestBody = new HashMap<>();
+        requestBody.put("star",requestDto.getStar().getValue());
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("access", token);
+
+        HttpEntity<Map<String, Integer>> request = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        System.out.println(response.getBody());
+
+        if(!response.getStatusCode().is2xxSuccessful()){
+            throw new IllegalArgumentException("can not update store rating");
+        }
+
 
         return ReviewResponseDto.of(review);
     }
