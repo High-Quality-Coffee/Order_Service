@@ -22,6 +22,7 @@ public class StoreResponseDto {
     private String phone;
     private List<String> categories;
     private String regionName;
+    private double averageRating;
 
     // 기본 생성자
     public StoreResponseDto(Store store) {
@@ -29,6 +30,7 @@ public class StoreResponseDto {
         this.storeName = store.getStoreName();
         this.address = store.getAddress();
         this.phone = store.getPhone();
+        this.averageRating = store.getAverageRating();
 
         this.categories = store.getStoreCategories() != null
                 ? store.getStoreCategories().stream()
