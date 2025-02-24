@@ -45,6 +45,8 @@ public class StoresClient {
             StoreClientResponse storeResponseDto =  objectMapper.readValue(
                     response.getBody(),
                     StoreClientResponse.class);
+
+            System.out.println(response.getBody());
             return storeResponseDto.getData();
 
         } catch (JsonProcessingException e) {

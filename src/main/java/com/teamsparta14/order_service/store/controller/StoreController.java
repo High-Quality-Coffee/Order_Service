@@ -46,7 +46,7 @@ public class StoreController {
     // [GET] 특정 가게 조회
 
     @GetMapping("/stores/{storeId}")
-    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable UUID storeId,@RequestHeader("access") String token) {
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable(name = "storeId") UUID storeId,@RequestHeader("access") String token) {
         Store store = storeService.getStoreById(storeId , token);
         StoreResponseDto storeResponseDto =  new StoreResponseDto(store);
         return ResponseEntity.ok(ApiResponse.success(storeResponseDto));
