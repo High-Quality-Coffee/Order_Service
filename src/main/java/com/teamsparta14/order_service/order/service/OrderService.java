@@ -1,10 +1,7 @@
 package com.teamsparta14.order_service.order.service;
 
 
-import com.teamsparta14.order_service.order.dto.OrderCreateDto;
-import com.teamsparta14.order_service.order.dto.OrderProductRequest;
-import com.teamsparta14.order_service.order.dto.OrderResponse;
-import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
+import com.teamsparta14.order_service.order.dto.*;
 import com.teamsparta14.order_service.order.entity.MyOrder;
 import com.teamsparta14.order_service.order.entity.OrderProduct;
 import com.teamsparta14.order_service.order.repository.OrderRepository;
@@ -196,5 +193,17 @@ public class OrderService {
 
         return orderRepository.searchByStoreId(userName, pageable,storeId).map(OrderResponse::from);
 
+    }
+
+    public List<OrderResponse> searchProduct(OrderSearchDto requestDto) {
+
+        List<MyOrder> orderList = orderRepository.searchOrderByIdList(requestDto);
+        List<OrderResponse> responseList = new ArrayList<>();
+
+        for (MyOrder order : orderList) {
+            responseList.add(OrderResponse.from(order));
+        }
+
+        return responseList;
     }
 }

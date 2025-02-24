@@ -8,6 +8,7 @@ import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 
+import com.teamsparta14.order_service.order.dto.OrderSearchDto;
 import com.teamsparta14.order_service.order.entity.MyOrder;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import static com.teamsparta14.order_service.order.entity.QMyOrder.myOrder;
 import static com.teamsparta14.order_service.order.entity.QOrderProduct.orderProduct;
 import static com.teamsparta14.order_service.payment.entity.QPayment.payment;
+import static com.teamsparta14.order_service.product.entity.QProduct.product;
 
 
 @RequiredArgsConstructor
@@ -76,6 +78,15 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
 
 
         return PageableExecutionUtils.getPage(query, pageable, count::fetchCount);
+    }
+
+    @Override
+    public List<MyOrder> searchOrderByIdList(OrderSearchDto requestDto) {
+
+        return jpaQueryFactory
+                .selectFrom(myOrder)
+                .where(myOrder.orderId.in(requestDto.getRequestIdList()))
+                .fetch();
     }
 
     public Page<MyOrder> searchAllOrders(Pageable pageable){

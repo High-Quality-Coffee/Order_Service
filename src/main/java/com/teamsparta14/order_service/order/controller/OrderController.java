@@ -4,17 +4,20 @@ import com.teamsparta14.order_service.global.response.ApiResponse;
 import com.teamsparta14.order_service.global.response.ResponseCode;
 import com.teamsparta14.order_service.order.dto.OrderCreateDto;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
+import com.teamsparta14.order_service.order.dto.OrderSearchDto;
 import com.teamsparta14.order_service.order.dto.OrderUpdateRequest;
 import com.teamsparta14.order_service.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -100,6 +103,12 @@ public class OrderController {
 
 
         return ResponseEntity.ok(ApiResponse.success(new PagedModel<>(orderService.searchOrdersByStoreId(storeId,token,page,limit,isAsc,orderBy))));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> searchOrder(@RequestBody OrderSearchDto requestDto) {
+
+        return ResponseEntity.ok().body(ApiResponse.success(orderService.searchProduct(requestDto)));
     }
 
     @ExceptionHandler({IllegalArgumentException.class})
