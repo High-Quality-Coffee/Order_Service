@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamsparta14.order_service.global.response.OrderClientResponse;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,7 +36,7 @@ public class OrderClient {
     private String SERVER_URL;
 
 
-    public List<OrderResponse> searchOrderList(List<UUID> requestIdList, String token) {
+    public OrderResponse searchOrderList(UUID requestId, String token) {
 
         URI uri = UriComponentsBuilder
                 .fromUriString(SERVER_URL)
@@ -42,16 +45,15 @@ public class OrderClient {
                 .build()
                 .toUri();
 
-        Map<String, List<UUID>> requestBody = new HashMap<>();
-        requestBody.put("requestIdList", requestIdList);
+        Map<String, UUID> requestBody = new HashMap<>();
+        requestBody.put("requestId", requestId);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("access", token);
 
         // 요청시 body에 requestIdList = [productId1,productId2,productId3]
-        HttpEntity<Map<String, List<UUID>>> request = new HttpEntity<>(requestBody, headers);
-
+        HttpEntity<Map<String, UUID>> request = new HttpEntity<>(requestBody, headers);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {

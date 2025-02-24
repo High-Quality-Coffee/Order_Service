@@ -198,15 +198,13 @@ public class OrderService {
 
     }
 
-    public List<OrderResponse> searchProduct(OrderSearchDto requestDto) {
+    public OrderResponse searchProduct(OrderSearchDto requestDto) {
 
-        List<MyOrder> orderList = orderRepository.searchOrderByIdList(requestDto);
-        List<OrderResponse> responseList = new ArrayList<>();
+        Optional<MyOrder> order = orderRepository.searchOrderById(requestDto.getRequestId());
 
-        for (MyOrder order : orderList) {
-            responseList.add(OrderResponse.from(order));
+        if(order.isEmpty()){
+            throw new IllegalArgumentException("Not found Order");
         }
-
-        return responseList;
+        return OrderResponse.from(order.get());
     }
 }

@@ -28,6 +28,9 @@ public class Review  extends BaseEntity {
     private UUID storeId;
 
     @NotNull
+    private UUID orderId;
+
+    @NotNull
     private String userName;
 
     @NotNull
@@ -43,6 +46,7 @@ public class Review  extends BaseEntity {
         return Review.builder()
                 .storeId(requestDto.getStoreId())
                 .userName(user)
+                .orderId(requestDto.getOrderId())
                 .review(requestDto.getReview())
                 .star(requestDto.getStar() != null ? requestDto.getStar() : Stars.ZERO)
                 .build();

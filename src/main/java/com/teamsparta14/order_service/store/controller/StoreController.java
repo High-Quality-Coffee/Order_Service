@@ -1,29 +1,17 @@
 package com.teamsparta14.order_service.store.controller;
 
 import com.teamsparta14.order_service.global.response.ApiResponse;
-import com.teamsparta14.order_service.product.entity.ProductStatus;
 import com.teamsparta14.order_service.review.dto.RatingDto;
 import com.teamsparta14.order_service.store.dto.*;
 import com.teamsparta14.order_service.store.entity.SortBy;
 import com.teamsparta14.order_service.store.entity.Store;
 import com.teamsparta14.order_service.store.entity.StoreStatus;
 import com.teamsparta14.order_service.store.service.StoreService;
-import com.teamsparta14.order_service.user.dto.CustomUserDetails;
-import com.teamsparta14.order_service.user.jwt.JWTUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Request;
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,7 +46,7 @@ public class StoreController {
     // [GET] 특정 가게 조회
 
     @GetMapping("/stores/{storeId}")
-    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable UUID storeId,@RequestHeader("access") String token) {
+    public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable(name = "storeId") UUID storeId,@RequestHeader("access") String token) {
         Store store = storeService.getStoreById(storeId , token);
         StoreResponseDto storeResponseDto =  new StoreResponseDto(store);
         return ResponseEntity.ok(ApiResponse.success(storeResponseDto));

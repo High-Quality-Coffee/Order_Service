@@ -106,7 +106,7 @@ public class OrderController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> searchOrder(@RequestBody OrderSearchDto requestDto) {
+    public ResponseEntity<ApiResponse<OrderResponse>> searchOrder(@RequestBody OrderSearchDto requestDto) {
 
         return ResponseEntity.ok().body(ApiResponse.success(orderService.searchProduct(requestDto)));
     }

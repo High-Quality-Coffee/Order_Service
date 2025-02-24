@@ -3,9 +3,7 @@ package com.teamsparta14.order_service.order.dto;
 import com.teamsparta14.order_service.order.entity.MyOrder;
 import com.teamsparta14.order_service.payment.dto.PaymentResponse;
 import com.teamsparta14.order_service.payment.entity.Payment;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +12,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderResponse {
     private UUID orderId;
     private String userName ;
