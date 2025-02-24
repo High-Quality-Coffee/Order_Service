@@ -1,7 +1,7 @@
 package com.teamsparta14.order_service.global.response;
 
 
-import com.teamsparta14.order_service.store.entity.Store;
+import com.teamsparta14.order_service.store.dto.StoreResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,5 +15,5 @@ import lombok.Setter;
 public class StoreClientResponse {
     String message;
     int status;
-    Store data;
+    StoreResponseDto data;
 }

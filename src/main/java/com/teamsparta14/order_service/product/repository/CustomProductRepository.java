@@ -24,4 +24,6 @@ public interface CustomProductRepository {
     List<Product> searchProductByIdList(ProductSearchDto requestDto);
 
     UUID findStoreIdByProductId(UUID productId);
+
+    boolean existsByStoreIdAndProductId(UUID storeId, UUID productId);
 }
