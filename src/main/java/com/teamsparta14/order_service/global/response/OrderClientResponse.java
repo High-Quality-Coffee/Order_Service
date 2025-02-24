@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 
 @Getter
 @Setter
@@ -16,5 +15,5 @@ import java.util.List;
 public class OrderClientResponse {
     String message;
     int status;
-    List<OrderResponse> data;
+    OrderResponse data;
 }

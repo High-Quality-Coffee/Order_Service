@@ -14,5 +14,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrderSearchDto {
 
-    private List<UUID> requestIdList;
+    private UUID requestId;
 }

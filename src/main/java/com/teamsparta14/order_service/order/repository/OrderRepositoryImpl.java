@@ -16,12 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.teamsparta14.order_service.order.entity.QMyOrder.myOrder;
 import static com.teamsparta14.order_service.order.entity.QOrderProduct.orderProduct;
 import static com.teamsparta14.order_service.payment.entity.QPayment.payment;
-import static com.teamsparta14.order_service.product.entity.QProduct.product;
+
 
 
 @RequiredArgsConstructor
@@ -81,12 +82,13 @@ public class OrderRepositoryImpl implements OrderCustomRepository {
     }
 
     @Override
-    public List<MyOrder> searchOrderByIdList(OrderSearchDto requestDto) {
+    public Optional<MyOrder> searchOrderById(UUID requestId) {
 
-        return jpaQueryFactory
+        return Optional.ofNullable(jpaQueryFactory
                 .selectFrom(myOrder)
-                .where(myOrder.orderId.in(requestDto.getRequestIdList()))
-                .fetch();
+                .where(myOrder.orderId.eq(requestId))
+                .select(myOrder)
+                .fetchOne());
     }
 
     public Page<MyOrder> searchAllOrders(Pageable pageable){

@@ -33,7 +33,7 @@ public class OrderClient {
     private String SERVER_URL;
 
 
-    public List<OrderResponse> searchOrderList(List<UUID> requestIdList, String token) {
+    public OrderResponse searchOrderList(UUID requestId, String token) {
 
         URI uri = UriComponentsBuilder
                 .fromUriString(SERVER_URL)
@@ -42,16 +42,15 @@ public class OrderClient {
                 .build()
                 .toUri();
 
-        Map<String, List<UUID>> requestBody = new HashMap<>();
-        requestBody.put("requestIdList", requestIdList);
+        Map<String, UUID> requestBody = new HashMap<>();
+        requestBody.put("requestId", requestId);
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("access", token);
 
         // 요청시 body에 requestIdList = [productId1,productId2,productId3]
-        HttpEntity<Map<String, List<UUID>>> request = new HttpEntity<>(requestBody, headers);
-
+        HttpEntity<Map<String, UUID>> request = new HttpEntity<>(requestBody, headers);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {

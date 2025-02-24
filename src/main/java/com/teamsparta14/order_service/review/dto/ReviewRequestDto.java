@@ -9,6 +9,7 @@ import java.util.UUID;
 public class ReviewRequestDto {
 
     private UUID storeId;
+    private UUID orderId;
     private String review;
     private Stars star;
 }
