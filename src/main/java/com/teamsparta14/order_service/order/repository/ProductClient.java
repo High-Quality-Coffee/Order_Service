@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamsparta14.order_service.global.response.ProductClientResponse;
 import com.teamsparta14.order_service.product.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -20,11 +21,11 @@ import java.util.UUID;
 
 
 @Service
-@RequiredArgsConstructor
 public class ProductClient {
 
 
-    private final String SERVER_URL = "http://localhost:8080";
+    @Value("${project.server.url}")
+    private String SERVER_URL;
 
 
     public List<ProductResponseDto> searchProductList(List<UUID> productIds, String token) {

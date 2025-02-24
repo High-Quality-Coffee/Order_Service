@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teamsparta14.order_service.global.response.OrderClientResponse;
 import com.teamsparta14.order_service.order.dto.OrderResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,7 +28,9 @@ import java.util.UUID;
 public class OrderClient {
 
 
-    private final String SERVER_URL = "http://localhost:8080";
+
+    @Value("${project.server.url}")
+    private String SERVER_URL;
 
 
     public List<OrderResponse> searchOrderList(List<UUID> requestIdList, String token) {

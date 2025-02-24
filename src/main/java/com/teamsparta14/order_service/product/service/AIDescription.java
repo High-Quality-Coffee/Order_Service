@@ -4,6 +4,7 @@ package com.teamsparta14.order_service.product.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,13 +20,13 @@ import java.net.URI;
 public class AIDescription {
 
 
-    private final String API_KEY = "API_KEY";
+    @Value("${project.api.key}")
+    private String API_KEY;
     private final String BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
 
 
     public String getDescription(String productName){
 
-        System.out.println(API_KEY + "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         URI uri = UriComponentsBuilder
                 .fromUriString(BASE_URL + API_KEY)
                 .build()
