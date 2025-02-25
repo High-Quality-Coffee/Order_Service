@@ -44,7 +44,6 @@ public class StoreController {
     }
 
     // [GET] 특정 가게 조회
-
     @GetMapping("/stores/{storeId}")
     public ResponseEntity<ApiResponse<StoreResponseDto>> getStore(@PathVariable(name = "storeId") UUID storeId,@RequestHeader("access") String token) {
         Store store = storeService.getStoreById(storeId , token);
@@ -87,6 +86,7 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(storeService.deleteStore(storeId, token)));
     }
 
+
     // [조회] 모든 카테고리
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse<List<CategoryResponseDto>>> getAllCategories() {
@@ -95,7 +95,7 @@ public class StoreController {
 
     // [조회] 특정 카테고리
     @GetMapping("/categories/{categoryId}")
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> getCategoryById(@PathVariable UUID categoryId) {
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> getCategoryById(@PathVariable("categoryId") UUID categoryId) {
         return ResponseEntity.ok(ApiResponse.success(storeService.getCategoryById(categoryId)));
     }
 
@@ -111,7 +111,7 @@ public class StoreController {
     // [수정] 카테고리
     @PutMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(
-            @PathVariable UUID categoryId,
+            @PathVariable("categoryId") UUID categoryId,
             @RequestBody CategoryRequestDto requestDto,
             @RequestHeader(name = "access") String token
     ) {
@@ -122,7 +122,7 @@ public class StoreController {
     // [삭제] 카테고리
     @DeleteMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse<String>> deleteCategory(
-            @PathVariable UUID categoryId,
+            @PathVariable("categoryId") UUID categoryId,
             @RequestHeader(name = "access") String token
     ) {
 
@@ -137,7 +137,7 @@ public class StoreController {
 
     // [조회] 특정 지역
     @GetMapping("/regions/{regionId}")
-    public ResponseEntity<ApiResponse<RegionResponseDto>> getRegionById(@PathVariable UUID regionId) {
+    public ResponseEntity<ApiResponse<RegionResponseDto>> getRegionById(@PathVariable("regionId") UUID regionId) {
         return ResponseEntity.ok(ApiResponse.success(storeService.getRegionById(regionId)));
     }
 
@@ -154,18 +154,18 @@ public class StoreController {
     // [수정] 지역
     @PutMapping("/regions/{regionId}")
     public ResponseEntity<ApiResponse<RegionResponseDto>> updateRegion(
-            @PathVariable UUID regionId,
-            @RequestBody RegionRequestDto requestDto,
+            @PathVariable("regionId") UUID regionId,
+            @RequestBody RegionUpdateRequestDto regionUpdateRequestDto,
             @RequestHeader(name = "access") String token
     ) {
 
-        return ResponseEntity.ok(ApiResponse.success(storeService.updateRegion(regionId, requestDto, token)));
+        return ResponseEntity.ok(ApiResponse.success(storeService.updateRegion(regionId, regionUpdateRequestDto, token)));
     }
 
     // [삭제] 지역
     @DeleteMapping("/regions/{regionId}")
     public ResponseEntity<ApiResponse<String>> deleteRegion(
-            @PathVariable UUID regionId,
+            @PathVariable("regionId") UUID regionId,
             @RequestHeader(name = "access") String token
     ) {
         return ResponseEntity.ok(ApiResponse.success(storeService.deleteRegion(regionId, token)));

@@ -288,7 +288,7 @@ public class StoreService {
 
     // [수정] 지역
     @Transactional
-    public RegionResponseDto updateRegion(UUID regionId, RegionRequestDto dto, String token) {
+    public RegionResponseDto updateRegion(UUID regionId, RegionUpdateRequestDto dto, String token) {
 
         String userRole = jwtUtil.getRole(token);
 
