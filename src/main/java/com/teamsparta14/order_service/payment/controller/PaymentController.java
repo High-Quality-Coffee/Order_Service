@@ -29,22 +29,20 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<ApiResponse<PaymentResponse>> updatePayment(
             @RequestBody PaymentUpdateDto paymentUpdateDto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+           @RequestHeader("access") String token
             ){
 
-        String userName = customUserDetails.getUsername();
 
-        return ResponseEntity.ok(ApiResponse.success(paymentService.updatePayment(paymentUpdateDto,userName)));
+        return ResponseEntity.ok(ApiResponse.success(paymentService.updatePayment(paymentUpdateDto,token)));
     }
     @Operation(summary = "결제 조회", description = "payment_id 통해결제 API")
     @Secured({"ROLE_OWNER","ROLE_MASTER"})
     @GetMapping("/{payment_id}")
     public ResponseEntity<ApiResponse<PaymentResponse>> getPayment(
             @PathVariable(name = "payment_id") UUID paymentId,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @RequestHeader("access") String token
     ){
 
-        String userName = customUserDetails.getUsername();
-        return ResponseEntity.ok(ApiResponse.success(paymentService.getPayment(paymentId , userName)));
+        return ResponseEntity.ok(ApiResponse.success(paymentService.getPayment(paymentId , token)));
     }
 }
