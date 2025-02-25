@@ -64,7 +64,6 @@ public class OrderController {
 
 
     @Operation(summary = "주문 전체 조회", description = "주문 전체 조회")
-    @Secured({"ROLE_USER","ROLE_MASTER"})
     @GetMapping
     public ResponseEntity<ApiResponse<PagedModel<OrderResponse>>> getOrderPageByUserName(
             @RequestHeader(name = "access") String token,
@@ -77,7 +76,6 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(new PagedModel<>(orderService.searchOrders(token,page,limit,isAsc,orderBy))));
     }
     @Operation(summary = "주문 수정", description = "주문 수정시 사용 API")
-    @Secured({"ROLE_USER"})
     @PutMapping
     public ResponseEntity<OrderResponse> updateOrder(
             @RequestBody OrderUpdateRequest orderUpdateRequest,
@@ -91,7 +89,6 @@ public class OrderController {
 
     //사장만 가능
     @Operation(summary = "주문 전체 조회", description = "storeId를 통해 주문조회 API")
-    @Secured({"ROLE_OWNER","ROLE_MASTER"})
     @GetMapping("/{store_id}/orders")
     public ResponseEntity<ApiResponse<PagedModel<OrderResponse>>> getOrderPageByStoreId(
             @RequestHeader(name = "access") String token,

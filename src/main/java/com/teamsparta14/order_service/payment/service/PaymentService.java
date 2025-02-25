@@ -4,6 +4,7 @@ import com.teamsparta14.order_service.payment.dto.PaymentResponse;
 import com.teamsparta14.order_service.payment.dto.PaymentUpdateDto;
 import com.teamsparta14.order_service.payment.entity.Payment;
 import com.teamsparta14.order_service.payment.repository.PaymentRepository;
+import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,12 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final JWTUtil jwtUtil;
 
     @Transactional
-    public PaymentResponse updatePayment(PaymentUpdateDto paymentUpdateDto, String userName) {
+    public PaymentResponse updatePayment(PaymentUpdateDto paymentUpdateDto, String token) {
+
+        String userName = jwtUtil.getUsername(token);
 
         Payment payment  = getPaymentByPaymentId(paymentUpdateDto.getPaymentId(),userName);
 
@@ -26,7 +30,9 @@ public class PaymentService {
         return PaymentResponse.from(payment);
     }
 
-    public PaymentResponse getPayment(UUID paymentId, String userName) {
+    public PaymentResponse getPayment(UUID paymentId, String token) {
+
+        String userName = jwtUtil.getUsername(token);
 
         Payment payment = getPaymentByPaymentId(paymentId,userName);
 
