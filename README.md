@@ -127,7 +127,7 @@ erdcloud : https://www.erdcloud.com/d/sT8WDsAXXqfbB9Gay
 | pgAdmin    |  <img src="https://img.shields.io/badge/pgAdmin-4169E1?style=for-the-badge&logo=pgAdmin&logoColor=white" alt="pgAdmin" width="200">    | latest  |
 | AWS ec2    |  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=for-the-badge&logo=AmazonEC2&logoColor=white" alt="ec2" width="200">    | |
 | AWS RDS    |  <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=for-the-badge&logo=AmazonRDS&logoColor=white" alt="rds" width="200">    | |
-| Nginx Proxy Manager |  <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=for-the-badge&logo=NginxProxyManager&logoColor=white" alt="Firebase" width="200">    | latest |
+| Nginx Proxy Manager |  <img src="https://img.shields.io/badge/Nginx Proxy Manager-F15833?style=for-the-badge&logo=NginxProxyManager&logoColor=white" alt="npm" width="200">    | latest |
 | Docker  |  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white" alt="docker" width="200">    |  |
 
 <br/>
