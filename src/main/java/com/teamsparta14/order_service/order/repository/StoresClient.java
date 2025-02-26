@@ -20,7 +20,6 @@ import java.net.URI;
 @Repository
 public class StoresClient {
 
-    private final String SERVER_URL = "http://localhost:8080";
     @Value("${SERVER_URL}")
     private String SERVER_URL;
 

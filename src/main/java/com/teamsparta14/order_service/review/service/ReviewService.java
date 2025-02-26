@@ -90,7 +90,6 @@ public class ReviewService {
 
         //storeId와 별점을 전달할 URL
         URI uri = UriComponentsBuilder
-                .fromUriString("http://localhost:8080")
                 .fromUriString("SERVER_URL")
                 .path("/api/stores/" + requestDto.getStoreId() + "/rating")
                 .encode()
