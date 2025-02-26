@@ -55,11 +55,9 @@ public class SecurityConfig {
         http
                 .cors((cors) -> cors
                         .configurationSource(new CorsConfigurationSource() {
-
                             @Override
                             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                                 CorsConfiguration configuration = new CorsConfiguration();
-
                                 configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
                                 configuration.setAllowedMethods(Collections.singletonList("*"));
                                 configuration.setAllowCredentials(true);
@@ -75,20 +73,19 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화 (POST 요청 허용)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/auth/join/**", "/api/auth/login", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()  // 회원가입은 인증 없이 가능
-                                .requestMatchers("/api/address/**", "/api/auth/delete").hasRole("USER")
-                                .requestMatchers("/api/user/list/{username}").hasRole("MASTER")
-                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/products/search").permitAll()
-                                .requestMatchers("/api/products/**").hasAnyRole("OWNER", "MASTER")
-                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-                                .requestMatchers("/api/revies/**").hasRole("USER")
-                                .requestMatchers(HttpMethod.DELETE,"/api/orders/**").hasRole("MASTER")
-                                .requestMatchers(HttpMethod.DELETE,"/api/orders/**/orders").hasRole("OWNER")
-                                .requestMatchers("/api/orders/**").hasAnyRole()
-                                .requestMatchers("/api/payments/**").hasAnyRole()
-                                .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
-//                        .anyRequest().permitAll()  // 그 외 모든 요청은 인증 필요
+                            .requestMatchers("/api/auth/join/**", "/api/auth/login", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()  // 회원가입은 인증 없이 가능
+                            .requestMatchers("/api/address/**", "/api/auth/delete").hasRole("USER")
+                            .requestMatchers("/api/user/list/{username}").hasRole("MASTER")
+                            .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/products/search").permitAll()
+                            .requestMatchers("/api/products/**").hasAnyRole("OWNER", "MASTER")
+                            .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                            .requestMatchers("/api/reviews/**").hasRole("USER")
+                            .requestMatchers(HttpMethod.DELETE,"/api/orders/**").hasAnyRole("MASTER","USER")
+                            .requestMatchers(HttpMethod.GET,"/api/orders/{store_id}/orders").hasAnyRole("OWNER","MASTER")
+                            .requestMatchers("/api/orders/**").hasAnyRole("USER","MASTER")
+                            .requestMatchers("/api/payments/**").hasAnyRole("USER","MASTER")
+                            .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )
                 .formLogin(login -> login.disable())  // 기본 로그인 폼 비활성화
                 .httpBasic(basic -> basic.disable()); // HTTP Basic 인증 비활성화

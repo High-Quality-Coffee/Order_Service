@@ -20,7 +20,7 @@ import java.net.URI;
 public class AIDescription {
 
 
-    @Value("${project.api.key}")
+    @Value("${API_KEY}")
     private String API_KEY;
     private final String BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=";
 

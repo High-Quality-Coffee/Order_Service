@@ -31,8 +31,7 @@ import java.util.UUID;
 public class OrderClient {
 
 
-
-    @Value("${project.server.url}")
+    @Value("${SERVER_URL}")
     private String SERVER_URL;
 
 

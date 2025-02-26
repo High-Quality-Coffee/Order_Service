@@ -12,6 +12,7 @@ import com.teamsparta14.order_service.review.repository.ReviewRepository;
 import com.teamsparta14.order_service.user.jwt.JWTUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,9 @@ public class ReviewService {
     private final JWTUtil jwtUtil;
     private final StoresClient storesClient;
     private final OrderClient orderClient;
+
+    @Value("${SERVER_URL}")
+    private String SERVER_URL;
 
     //리뷰 전체 조회
     public List<ReviewResponseDto> getReviews(UUID storeId, Pageable pageable, SortBy sortBy) {
@@ -87,6 +91,7 @@ public class ReviewService {
         //storeId와 별점을 전달할 URL
         URI uri = UriComponentsBuilder
                 .fromUriString("http://localhost:8080")
+                .fromUriString("SERVER_URL")
                 .path("/api/stores/" + requestDto.getStoreId() + "/rating")
                 .encode()
                 .build()

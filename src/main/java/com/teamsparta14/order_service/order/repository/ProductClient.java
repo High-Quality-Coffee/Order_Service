@@ -25,6 +25,7 @@ public class ProductClient {
 
 
     @Value("${project.server.url}")
+    @Value("${SERVER_URL}")
     private String SERVER_URL;
 
 
