@@ -1,3 +1,5 @@
+주문을 스마트하게! 음식 주문 관리 서비스 Order Now!
+
 <img src="https://github.com/user-attachments/assets/c3491418-e133-41c7-8f85-97dd70589fb4" alt="서비스 소개" width="100%"/>
 
 
